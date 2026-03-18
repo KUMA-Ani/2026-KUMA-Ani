@@ -2,26 +2,24 @@
 import projects from '../../data/projects.json';
 const { id } = Astro.params;
 
-export function getStaticPaths() {
+---
+export async function getStaticPaths() {
+  // 1. id가 있고, category가 없는 '진짜 작품'만 필터링
+  // 2. 동시에 comments라는 키가 있는 객체는 무조건 제외
   const actualProjects = projects.filter(p => 
-    p.id &&             // id가 반드시 있어야 함
-    p.id.length > 0 &&  // id가 빈 문자열이 아니어야 함
-    !p.category         // 트랙 카테고리 데이터는 제외
+    p.id && 
+    !p.category && 
+    !p.hasOwnProperty('comments')
   );
-  
-  if (actualProjects.length === 0) {
-    console.warn("⚠️ 생성할 프로젝트 데이터가 없습니다!");
-  }
 
-  return actualProjects.map(p => ({
-    params: { id: String(p.id) } // id를 확실히 문자열로 변환
+  return actualProjects.map((p) => ({
+    params: { id: p.id.toString() }, // id를 확실히 문자열로 변환
+    props: { project: p },
   }));
 }
-const project = projects.find(p => p.id === id);
-// 배포 환경 최적화를 위해 경로에서 /2026-KUMA-Ani 제거
-const sampleImg = "/images/sample.jpg";
----
 
+const { project } = Astro.props;
+---
 <html lang="ko">
 <head>
     <meta charset="utf-8" />

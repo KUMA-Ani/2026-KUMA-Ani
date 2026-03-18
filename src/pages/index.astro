@@ -30,43 +30,65 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
 
         /* ✨ 모바일 반응형 추가: 화면 너비가 768px 이하일 때 */
 @media (max-width: 768px) {
-            .split-container { 
-                flex-direction: column;
-                overflow-y: auto; /* 내용이 길어지면 스크롤 가능하게 */
-                height: auto; /* 고정 높이 해제 */
-                min-height: 100vh;
-            }
-            
-            .track-section { 
-                width: 100%; 
-                /* 1. 고정 50vh 대신 최소 높이와 여백 설정 */
-                min-height: 300px; 
-                padding: 80px 20px; 
-                
-                flex: none; /* 플렉스 비율 고정 해제 */
-                border-right: none;
-                margin-bottom: -1px; 
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
+    body, html { 
+        overflow-y: auto; /* 모바일에서 스크롤 허용 */
+        background-color: #050505; 
+    }
 
-            /* 2. 모바일에서 텍스트 크기 더 컴팩트하게 조절 */
-            h2 { font-size: 2.2rem; }
-            .description { font-size: 1rem; margin-top: 10px; }
-            .category-tag { font-size: 0.7rem; letter-spacing: 2px; }
+    .split-container { 
+        flex-direction: column; 
+        height: auto; 
+        padding: 40px 20px; /* 상하단 여백 */
+        gap: 20px; /* 카드 사이 간격 */
+    }
 
-            /* 3. 배경 이미지의 중심이 더 잘 보이도록 조정 */
-            .game, .animation {
-                background-attachment: scroll; /* 모바일 성능 고려 */
-                background-position: center center;
-            }
+    .track-section { 
+        flex: none;
+        width: 100%;
+        height: 220px; /* 카드 고정 높이 */
+        border-radius: 20px; /* 둥근 모서리 */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 0;
+        background-attachment: scroll;
+    }
 
-            /* 4. 호버 효과를 모바일 터치에 맞게 약화 (선택 사항) */
-            .track-section:hover { 
-                flex: none; 
-                transform: scale(1.02);
-                z-index: 10;
-            }
-        }
+    /* 카드 내 콘텐츠 위치 조정 */
+    .track-content {
+        width: 100%;
+        padding: 0 30px;
+        text-align: left; /* 모바일은 왼쪽 정렬이 더 읽기 편함 */
+    }
+
+    .category-tag { 
+        font-size: 0.7rem; 
+        letter-spacing: 2px; 
+        margin-bottom: 5px;
+    }
+
+    h2 { 
+        font-size: 2.2rem; 
+        line-height: 1.1;
+    }
+
+    .description { 
+        font-size: 0.9rem; 
+        margin-top: 8px;
+        opacity: 0.6;
+    }
+
+    /* 카드별 배경 그라데이션 - 카드 안에서만 어두워지게 */
+    .game { 
+        background: linear-gradient(90deg, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%), 
+                    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80');
+        background-size: cover;
+    }
+    
+    .animation { 
+        background: linear-gradient(90deg, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%), 
+                    url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80');
+        background-size: cover;
+    }
+}
     </style>
 </head>
 <body>

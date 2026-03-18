@@ -32,15 +32,16 @@ const individualProjects = trackProjects.filter(p => p.type === 'individual');
     </style>
 </head>
 <body>
-    <a href="/2026-KUMA-Ani/" class="back">← MAIN</a>
+    <a href="/" class="back">← MAIN</a>
     <h1>{id === 'Games' ? 'Game Track' : 'Animation Track'}</h1>
 
     {teamProjects.length > 0 && (
         <h2>Team Projects</h2>
         <div class="grid">
             {teamProjects.map(p => (
-                <a href={`/2026-KUMA-Ani/project/${p.id}/`} class="card">
-                    <div class="thumb" style={`background-image: url('/2026-KUMA-Ani/images/sample.jpg')`}></div>
+                /* 수정: /2026-KUMA-Ani/ 제거 */
+                <a href={`/project/${p.id}/`} class="card">
+                    <div class="thumb" style={`background-image: url('/images/sample.jpg')`}></div>
                     <div class="info"><h3>{p.title}</h3><p>{p.team}</p></div>
                 </a>
             ))}
@@ -51,8 +52,9 @@ const individualProjects = trackProjects.filter(p => p.type === 'individual');
         <h2>Individual Projects</h2>
         <div class="grid">
             {individualProjects.map(p => (
-                <a href={`/2026-KUMA-Ani/project/${p.id}/`} class="card">
-                    <div class="thumb" style={`background-image: url('/2026-KUMA-Ani/images/sample.jpg')`}></div>
+                /* 수정: /2026-KUMA-Ani/ 제거 */
+                <a href={`/project/${p.id}/`} class="card">
+                    <div class="thumb" style={`background-image: url('/images/sample.jpg')`}></div>
                     <div class="info"><h3>{p.title}</h3><p>{p.team}</p></div>
                 </a>
             ))}

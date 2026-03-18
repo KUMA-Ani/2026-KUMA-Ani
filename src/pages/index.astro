@@ -32,38 +32,40 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
 @media (max-width: 768px) {
             .split-container { 
                 flex-direction: column;
-                overflow: hidden; /* 스크롤바 때문에 생기는 틈 방지 */
+                overflow-y: auto; /* 내용이 길어지면 스크롤 가능하게 */
+                height: auto; /* 고정 높이 해제 */
+                min-height: 100vh;
             }
+            
             .track-section { 
                 width: 100%; 
-                height: 50vh; 
+                /* 1. 고정 50vh 대신 최소 높이와 여백 설정 */
+                min-height: 300px; 
+                padding: 80px 20px; 
+                
+                flex: none; /* 플렉스 비율 고정 해제 */
                 border-right: none;
-                
-                /* 1. 틈새 방지 핵심: 아래쪽 섹션과 아주 살짝 겹치게 설정 */
                 margin-bottom: -1px; 
-                
-                /* 2. 경계선 설정 (필요 없다면 0px로 변경 가능) */
-                border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-                
-                transition: height 0.7s ease;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
-            /* 3. 아래쪽 섹션(애니메이션)의 그라데이션 시작점을 조정하여 경계를 더 자연스럽게 */
-            .animation { 
-                background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(220, 53, 69, 0.2) 100%), 
-                            url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80');
-                background-size: cover;
-                background-position: center;
+            /* 2. 모바일에서 텍스트 크기 더 컴팩트하게 조절 */
+            h2 { font-size: 2.2rem; }
+            .description { font-size: 1rem; margin-top: 10px; }
+            .category-tag { font-size: 0.7rem; letter-spacing: 2px; }
+
+            /* 3. 배경 이미지의 중심이 더 잘 보이도록 조정 */
+            .game, .animation {
+                background-attachment: scroll; /* 모바일 성능 고려 */
+                background-position: center center;
             }
 
-            .game {
-                background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 123, 255, 0.2) 100%), 
-                            url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80');
-                background-size: cover;
-                background-position: center;
+            /* 4. 호버 효과를 모바일 터치에 맞게 약화 (선택 사항) */
+            .track-section:hover { 
+                flex: none; 
+                transform: scale(1.02);
+                z-index: 10;
             }
-
-            h2 { font-size: 2.5rem; }
         }
     </style>
 </head>

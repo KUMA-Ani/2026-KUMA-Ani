@@ -29,19 +29,60 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
         .description { font-size: 1.1rem; opacity: 0.7; margin-top: 15px; }
 
         /* ✨ 모바일 반응형 추가: 화면 너비가 768px 이하일 때 */
-@media (max-width: 768px) {
-    .track-section { 
-        width: 100%; 
-        height: 50vh; 
-        border-right: none; 
-        
-        /* 틈새 방지: 경계선을 지우고 살짝 겹침 */
-        border-bottom: none; 
-        margin-bottom: -1px; 
-        
-        transition: height 0.7s ease;
-    }
-}
+/* ✨ 모바일 반응형: 카드 스타일 디자인 */
+        @media (max-width: 768px) {
+            body, html { 
+                overflow-y: auto; /* 카드 리스트가 길어질 수 있으므로 스크롤 허용 */
+                height: auto;
+                background-color: #000;
+            }
+
+            .split-container { 
+                flex-direction: column; 
+                padding: 40px 20px; /* 상하좌우 여백 */
+                gap: 20px; /* 카드 사이 간격 */
+                height: auto;
+                min-height: 100vh;
+                box-sizing: border-box;
+                justify-content: center; /* 중앙 배치 */
+            }
+
+            .track-section { 
+                flex: none;
+                width: 100%; 
+                height: 250px; /* 카드의 고정 높이 */
+                border-radius: 24px; /* 둥근 모서리 */
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                margin-bottom: 0;
+                /* 호버 시 늘어나는 효과 대신 살짝 커지는 효과로 변경 */
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .track-section:hover { 
+                flex: none; 
+                transform: scale(1.02);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            }
+
+            /* 모바일 텍스트 크기 최적화 */
+            h2 { font-size: 2.2rem; }
+            .category-tag { font-size: 0.7rem; letter-spacing: 2px; }
+            .description { font-size: 0.9rem; margin-top: 8px; }
+
+            /* 카드용 그라데이션 재설정 (이미지가 더 잘 보이게) */
+            .game { 
+                background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(0, 123, 255, 0.2) 100%), 
+                            url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80');
+                background-size: cover;
+                background-position: center;
+            }
+            .animation { 
+                background: linear-gradient(to right, rgba(0, 0, 0, 0.8) 0%, rgba(220, 53, 69, 0.2) 100%), 
+                            url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80');
+                background-size: cover;
+                background-position: center;
+            }
+        }
     </style>
 </head>
 <body>

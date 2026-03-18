@@ -25,8 +25,11 @@ import projects from '../../data/projects.json';
 const { id } = Astro.params;
 
 export function getStaticPaths() {
-  return projects.filter(p => p.id && p.track).map(p => ({
-    params: { id: p.id }
+  // category가 있는 데이터(Games, Animations)만 골라냅니다.
+  const trackData = projects.filter(p => p.category);
+  
+  return trackData.map(p => ({
+    params: { track: p.id } // id가 'Games' 또는 'Animations'인 것들
   }));
 }
 

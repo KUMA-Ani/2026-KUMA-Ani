@@ -31,34 +31,39 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
         /* ✨ 모바일 반응형 추가: 화면 너비가 768px 이하일 때 */
         @media (max-width: 768px) {
             .split-container { 
-                flex-direction: column; /* 위아래 배치로 변경 */
-                overflow-y: auto; /* 내용이 많을 경우 스크롤 허용 */
+                flex-direction: column;
+                overflow: hidden; /* 스크롤바 때문에 생기는 틈 방지 */
             }
             .track-section { 
                 width: 100%; 
-                height: 50vh; /* 각각 화면의 절반씩 차지 */
-                border-right: none; /* 기존 가로 테두리 삭제 */
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 세로 경계선 추가 */
-                transition: height 0.7s ease; /* 호버 효과를 높이로 변경 */
+                height: 50vh; 
+                border-right: none;
+                
+                /* 1. 틈새 방지 핵심: 아래쪽 섹션과 아주 살짝 겹치게 설정 */
+                margin-bottom: -1px; 
+                
+                /* 2. 경계선 설정 (필요 없다면 0px로 변경 가능) */
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+                
+                transition: height 0.7s ease;
             }
-            .track-section:hover { 
-                height: 60vh; /* 터치 환경을 고려하여 부드러운 호버 효과 */
-                flex: 1; /* flex 호버 제외 */
-            }
-            h2 { font-size: 2.8rem; } /* 모바일에서 글자 크기 최적화 */
-            .category-tag { font-size: 0.75rem; letter-spacing: 3px; }
 
-            /* ✨ 세로 배치에 최적화된 그라데이션 수정 */
-            .game { 
-                background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 123, 255, 0.3) 100%), 
-                            url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80');
-                background-size: cover; background-position: center;
-            }
+            /* 3. 아래쪽 섹션(애니메이션)의 그라데이션 시작점을 조정하여 경계를 더 자연스럽게 */
             .animation { 
-                background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(220, 53, 69, 0.3) 100%), 
+                background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(220, 53, 69, 0.2) 100%), 
                             url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80');
-                background-size: cover; background-position: center;
+                background-size: cover;
+                background-position: center;
             }
+
+            .game {
+                background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 123, 255, 0.2) 100%), 
+                            url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80');
+                background-size: cover;
+                background-position: center;
+            }
+
+            h2 { font-size: 2.5rem; }
         }
     </style>
 </head>

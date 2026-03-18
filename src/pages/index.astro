@@ -13,15 +13,15 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
     <title>KUMA 졸업 전시회 - 트랙 선택</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Pretendard', sans-serif; }
-        
+
         /* 기본 레이아웃: 가로 배치 */
         .split-container { display: flex; width: 100%; height: 100vh; flex-direction: row; }
-        
+
         .track-section { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; overflow: hidden; transition: flex 0.7s cubic-bezier(0.25, 1, 0.5, 1); }
-        
+
         .game { background: linear-gradient(rgba(0, 123, 255, 0.3), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; border-right: 1px solid rgba(255, 255, 255, 0.1); }
         .animation { background: linear-gradient(rgba(220, 53, 69, 0.3), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; }
-        
+
         .track-section:hover { flex: 1.5; }
         .track-content { position: relative; z-index: 2; text-align: center; color: white; transition: transform 0.3s ease; }
         .category-tag { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: rgba(255, 255, 255, 0.6); margin-bottom: 10px; display: block; }
@@ -30,63 +30,16 @@ const animationTrack = tracks.find(t => t.id === 'Animations');
 
         /* ✨ 모바일 반응형 추가: 화면 너비가 768px 이하일 때 */
 @media (max-width: 768px) {
-    body, html { 
-        overflow-y: auto; /* 모바일에서 스크롤 허용 */
-        background-color: #050505; 
-    }
-
-    .split-container { 
-        flex-direction: column; 
-        height: auto; 
-        padding: 40px 20px; /* 상하단 여백 */
-        gap: 20px; /* 카드 사이 간격 */
-    }
-
     .track-section { 
-        flex: none;
-        width: 100%;
-        height: 220px; /* 카드 고정 높이 */
-        border-radius: 20px; /* 둥근 모서리 */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        margin: 0;
-        background-attachment: scroll;
-    }
-
-    /* 카드 내 콘텐츠 위치 조정 */
-    .track-content {
-        width: 100%;
-        padding: 0 30px;
-        text-align: left; /* 모바일은 왼쪽 정렬이 더 읽기 편함 */
-    }
-
-    .category-tag { 
-        font-size: 0.7rem; 
-        letter-spacing: 2px; 
-        margin-bottom: 5px;
-    }
-
-    h2 { 
-        font-size: 2.2rem; 
-        line-height: 1.1;
-    }
-
-    .description { 
-        font-size: 0.9rem; 
-        margin-top: 8px;
-        opacity: 0.6;
-    }
-
-    /* 카드별 배경 그라데이션 - 카드 안에서만 어두워지게 */
-    .game { 
-        background: linear-gradient(90deg, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%), 
-                    url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80');
-        background-size: cover;
-    }
-    
-    .animation { 
-        background: linear-gradient(90deg, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0) 100%), 
-                    url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80');
-        background-size: cover;
+        width: 100%; 
+        height: 50vh; 
+        border-right: none; 
+        
+        /* 틈새 방지: 경계선을 지우고 살짝 겹침 */
+        border-bottom: none; 
+        margin-bottom: -1px; 
+        
+        transition: height 0.7s ease;
     }
 }
     </style>

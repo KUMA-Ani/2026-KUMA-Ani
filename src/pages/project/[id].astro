@@ -9,21 +9,99 @@ export function getStaticPaths() {
 }
 
 const project = projects.find(p => p.id === id);
-/* 수정: 이미지 경로에서 /2026-KUMA-Ani/ 제거 */
+// 배포 환경 최적화를 위해 경로에서 /2026-KUMA-Ani 제거
 const sampleImg = "/images/sample.jpg";
 ---
 
 <html lang="ko">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{project?.title} - Showcase</title>
     <style>
-        /* (기존 스타일 코드와 동일하여 생략합니다) */
+        body { background: #000; color: #eee; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 60px 20px; }
+        /* 수정: 경로 최적화 및 폰트 크기 조정 */
+        .back-btn { color: #888; text-decoration: none; display: block; margin-bottom: 20px; font-size: 1.2rem; transition: 0.3s; }
+        .back-btn:hover { color: #007bff; }
+        
+        .page-header { margin-bottom: 50px; }
+        .page-header h1 { font-size: 2.8rem; margin: 0; font-weight: 800; }
+        .page-header .subtitle { color: #666; font-size: 1.1rem; margin-top: 10px; }
+
+        /* 핵심 수정: 레이아웃 비율을 2:1 정도로 조정하여 정보 카드가 잘 보이게 함 */
+        .content-layout { 
+            display: grid; 
+            grid-template-columns: 1.8fr 1fr; 
+            gap: 30px; 
+            align-items: start;
+            margin-bottom: 60px; 
+        }
+
+        .video-box iframe { 
+            width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: 1px solid #222; display: block;
+        }
+        
+        .download-btn { 
+            display: block; width: 100%; box-sizing: border-box;
+            padding: 25px; background: #007bff; color: white; text-align: center; 
+            text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem;
+            margin-top: 25px; transition: 0.3s;
+        }
+        .download-btn:hover { background: #0069d9; transform: translateY(-2px); }
+
+        .info-card { 
+            background: #111; border: 1px solid #222; border-radius: 20px; 
+            box-sizing: border-box;
+        }
+
+        .description-card { padding: 40px; min-height: 200px; margin-bottom: 20px; }
+        .members-card { padding: 35px; }
+        
+        .info-card h2 { 
+            font-size: 1.4rem; margin: 0 0 20px 0; display: flex; align-items: center; 
+            font-weight: 700; color: #fff;
+        }
+        .info-card h2::before { 
+            content: ''; display: inline-block; width: 4px; height: 1.2rem; 
+            background: #007bff; margin-right: 12px; border-radius: 2px;
+        }
+
+        .description { line-height: 1.8; color: #ccc; font-size: 1rem; word-break: keep-all; }
+
+        /* 제작진 그리드 수정: 박스들이 유연하게 배치되도록 함 */
+        .members-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            gap: 10px; 
+        }
+
+        .member-item { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            padding: 15px 10px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .member-role { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-weight: 500; }
+        .member-name { font-size: 1.1rem; color: #fff; font-weight: 700; }
+
+        .gallery { border-top: 1px solid #222; padding-top: 60px; }
+        .screenshot-list { display: flex; flex-direction: column; gap: 40px; }
+        .screenshot-list img { width: 100%; border-radius: 15px; border: 1px solid #111; }
+
+        @media (max-width: 1024px) {
+            .content-layout { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        /* 수정: /2026-KUMA-Ani/ 제거 */
         <a href={`/track/${project?.track}/`} class="back-btn">⬅ 목록으로 돌아가기</a>
         
         <div class="page-header">
@@ -31,6 +109,46 @@ const sampleImg = "/images/sample.jpg";
             <p class="subtitle">{project?.team} | {project?.type === 'team' ? 'TEAM PROJECT' : 'INDIVIDUAL'}</p>
         </div>
         
+        <div class="content-layout">
+            <div class="left-col">
+                <div class="video-box">
+                    <iframe src={`https://www.youtube.com/embed/${project?.youtubeId}`} frameborder="0" allowfullscreen></iframe>
+                </div>
+                {project?.track === 'Games' && (
+                    <a href="#" class="download-btn">🎮 게임 다운로드하기!</a>
+                )}
+            </div>
+
+            <div class="right-col">
+                <div class="info-card description-card">
+                    <h2>작품 개요</h2>
+                    <div class="description">{project?.description}</div>
+                </div>
+
+                <div class="info-card members-card">
+                    <h2>제작진</h2>
+                    <div class="members-grid">
+                        {project?.members?.map(m => (
+                            <div class="member-item">
+                                <span class="member-role">{m.role}</span>
+                                <span class="member-name">{m.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <div class="gallery">
+            <div class="screenshot-list">
+                {/* JSON에 정의된 실제 스크린샷이 있으면 출력, 없으면 샘플 3개만 표시 */}
+                {project?.screenshots ? project.screenshots.map((src) => (
+                    <img src={src} alt="Showcase Image" loading="lazy" />
+                )) : [...Array(3)].map(() => (
+                    <img src={sampleImg} alt="Sample Image" />
+                ))}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

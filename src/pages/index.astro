@@ -1,200 +1,263 @@
 ---
-const years = [
-  { year: 2026, active: true }
-];
+// 연도 선택 메인 페이지 - 관리자 기능 포함
 ---
-
 <html lang="ko">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KUMA 졸업 전시회</title>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KUMA 졸업 전시회</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; overflow: hidden; }
 
-        body, html {
-            width: 100%; height: 100%;
-            background: #000;
-            color: #fff;
-            font-family: 'Pretendard', 'Inter', sans-serif;
-            overflow: hidden;
-        }
+    .bg { position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(0,80,200,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(180,30,60,0.10) 0%, transparent 60%), #000; z-index: 0; }
+    .grid-overlay { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; }
 
-        .bg {
-            position: fixed; inset: 0;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(0, 80, 200, 0.12) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 50%, rgba(180, 30, 60, 0.10) 0%, transparent 60%),
-                #000;
-            z-index: 0;
-        }
+    .page { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; gap: 60px; }
 
-        .grid-overlay {
-            position: fixed; inset: 0; z-index: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-        }
+    .header { text-align: center; }
+    .header .label { font-size: 0.8rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; cursor: default; user-select: none; }
+    .header h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; letter-spacing: -2px; line-height: 1; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .header .sub { font-size: 1rem; color: rgba(255,255,255,0.3); margin-top: 12px; }
 
-        .page {
-            position: relative; z-index: 1;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            width: 100%; height: 100vh;
-            gap: 60px;
-        }
+    .years-container { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center; padding: 0 20px; }
 
-        .header { text-align: center; }
+    /* 연도 카드 */
+    .year-card {
+      position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 220px; height: 280px; border-radius: 24px; text-decoration: none; color: white; overflow: visible;
+      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s ease;
+    }
+    .year-card-inner {
+      width: 100%; height: 100%; border-radius: 24px; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .year-card-inner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%); }
+    .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
 
-        .header .label {
-            font-size: 0.8rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.35);
-            margin-bottom: 16px;
-        }
+    .year-card:hover { transform: translateY(-8px) scale(1.02); }
+    .year-card:hover .year-card-inner { box-shadow: 0 0 0 1px rgba(100,160,255,0.2), 0 40px 80px rgba(0,80,200,0.25); }
 
-        .header h1 {
-            font-size: clamp(2.5rem, 6vw, 5rem);
-            font-weight: 900;
-            letter-spacing: -2px;
-            line-height: 1;
-            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .year-badge { position: absolute; top: 18px; right: 18px; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; color: rgba(100,200,255,0.8); background: rgba(0,100,255,0.12); border: 1px solid rgba(0,100,255,0.2); z-index: 1; }
+    .year-number { font-size: 4.5rem; font-weight: 900; letter-spacing: -4px; line-height: 1; position: relative; z-index: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .year-label-text { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 8px; position: relative; z-index: 1; }
+    .year-arrow { position: absolute; bottom: 22px; font-size: 1.2rem; opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; z-index: 1; }
+    .year-card:hover .year-arrow { opacity: 1; transform: translateY(0); }
 
-        .header .sub {
-            font-size: 1rem;
-            color: rgba(255,255,255,0.3);
-            margin-top: 12px;
-            letter-spacing: 1px;
-        }
+    /* 관리자: 연도 카드 편집 버튼 */
+    .year-edit-btn {
+      display: none; position: absolute; top: 10px; left: 10px; z-index: 10;
+      background: rgba(255,193,7,0.85); border: none; border-radius: 8px;
+      padding: 4px 10px; font-size: 0.7rem; color: #000; font-weight: 700; cursor: pointer;
+    }
+    .admin-mode .year-edit-btn { display: block; }
 
-        .years-container {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 0 20px;
-        }
+    /* 관리자: 트랙 추가 서브메뉴 (호버 시) */
+    .year-submenu {
+      display: none; position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%);
+      background: rgba(20,20,20,0.95); border: 1px solid #333; border-radius: 12px;
+      padding: 8px; white-space: nowrap; z-index: 20;
+    }
+    .admin-mode .year-card:hover .year-submenu { display: flex; gap: 6px; }
+    .submenu-btn {
+      padding: 6px 14px; border-radius: 8px; border: 1px solid #444;
+      background: #1a1a1a; color: #fff; font-size: 0.75rem; cursor: pointer; transition: background 0.2s;
+    }
+    .submenu-btn:hover { background: #333; }
 
-        .year-card {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 220px;
-            height: 280px;
-            border-radius: 24px;
-            text-decoration: none;
-            color: white;
-            overflow: hidden;
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
-        }
+    /* + 연도 추가 카드 */
+    .year-add-card {
+      display: none; width: 100px; height: 280px; border-radius: 24px;
+      border: 2px dashed rgba(255,255,255,0.2); background: transparent;
+      align-items: center; justify-content: center; flex-direction: column;
+      color: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s; gap: 8px; font-size: 0.8rem;
+    }
+    .year-add-card:hover { border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.03); }
+    .admin-mode .year-add-card { display: flex; }
+    .year-add-card .plus { font-size: 2rem; line-height: 1; }
 
-        .year-card.active {
-            border: 1px solid rgba(255,255,255,0.15);
-            background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5);
-            cursor: pointer;
-        }
+    .footer-text { font-size: 0.75rem; color: rgba(255,255,255,0.15); letter-spacing: 2px; text-transform: uppercase; }
 
-        .year-card.active::before {
-            content: '';
-            position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%);
-        }
+    /* 비활성 연도 */
+    .year-card.inactive { opacity: 0.35; pointer-events: none; }
+    .admin-mode .year-card.inactive { pointer-events: auto; opacity: 0.5; }
 
-        .year-card.active:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 0 0 1px rgba(100,160,255,0.2), 0 40px 80px rgba(0,80,200,0.25);
-        }
+    /* 관리자 로그인 숨김 트리거 */
+    #admin-trigger { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; opacity: 0; cursor: pointer; z-index: 100; }
 
-        .year-badge {
-            position: absolute;
-            top: 18px; right: 18px;
-            font-size: 0.65rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            padding: 4px 10px;
-            border-radius: 20px;
-            color: rgba(100,200,255,0.8);
-            background: rgba(0,100,255,0.12);
-            border: 1px solid rgba(0,100,255,0.2);
-        }
-
-        .year-number {
-            font-size: 4.5rem;
-            font-weight: 900;
-            letter-spacing: -4px;
-            line-height: 1;
-            position: relative; z-index: 1;
-            background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .year-desc {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.5);
-            margin-top: 10px;
-            letter-spacing: 1px;
-            position: relative; z-index: 1;
-        }
-
-        .arrow {
-            position: absolute;
-            bottom: 22px;
-            font-size: 1.2rem;
-            opacity: 0;
-            transform: translateY(4px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-
-        .year-card.active:hover .arrow { opacity: 1; transform: translateY(0); }
-
-        .footer-text {
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.15);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        @media (max-width: 600px) {
-            .year-card { width: 160px; height: 220px; }
-            .year-number { font-size: 3.2rem; }
-        }
-    </style>
+    @media (max-width: 600px) { .year-card { width: 160px; height: 220px; } .year-number { font-size: 3.2rem; } }
+  </style>
 </head>
 <body>
-    <div class="bg"></div>
-    <div class="grid-overlay"></div>
+  <div class="bg"></div>
+  <div class="grid-overlay"></div>
 
-    <div class="page">
-        <div class="header">
-            <p class="label">KUMA · Game & Animation</p>
-            <h1>졸업 전시회</h1>
-            <p class="sub">연도를 선택해 전시관에 입장하세요</p>
-        </div>
-
-        <div class="years-container">
-            {years.map(({ year, active }) => (
-                <a href={active ? `/${year}/` : undefined} class={`year-card ${active ? 'active' : 'inactive'}`} style={!active ? 'pointer-events:none;opacity:0.3;' : ''}>
-                    <span class="year-badge">{active ? 'OPEN' : '준비중'}</span>
-                    <span class="year-number">{year}</span>
-                    <span class="year-desc">{active ? '전시 보러가기' : 'Coming Soon'}</span>
-                    {active && <span class="arrow">→</span>}
-                </a>
-            ))}
-        </div>
-
-        <p class="footer-text">국민대학교 게임애니메이션과</p>
+  <div class="page" id="main-page">
+    <div class="header">
+      <p class="label" id="site-label">KUMA · Game & Animation</p>
+      <h1 id="site-title">졸업 전시회</h1>
+      <p class="sub" id="site-sub">연도를 선택해 전시관에 입장하세요</p>
     </div>
+
+    <div class="years-container" id="years-container">
+      <!-- JS로 렌더링 -->
+    </div>
+
+    <p class="footer-text">국민대학교 게임애니메이션과</p>
+  </div>
+
+  <!-- 관리자 로그인 숨김 버튼 -->
+  <div id="admin-trigger" title="관리자"></div>
+
+  <script type="module">
+    import { isAdmin, showLoginModal, injectAdminBar, getData, saveData, showEditModal } from '/js/admin.js';
+
+    let siteData = null;
+
+    async function init() {
+      siteData = await getData();
+      renderYears();
+      if (isAdmin()) {
+        document.body.classList.add('admin-mode');
+        injectAdminBar();
+      }
+    }
+
+    function renderYears() {
+      const container = document.getElementById('years-container');
+      container.innerHTML = '';
+
+      siteData.years.forEach((year, yi) => {
+        const card = document.createElement('a');
+        card.href = year.active ? `/${year.id}/` : 'javascript:void(0)';
+        card.className = `year-card ${year.active ? '' : 'inactive'}`;
+        card.dataset.yi = yi;
+
+        card.innerHTML = `
+          <div class="year-card-inner">
+            ${year.thumbnail ? `<div class="year-card-bg" style="background-image:url('${year.thumbnail}')"></div>` : ''}
+            <span class="year-badge">${year.active ? 'OPEN' : '준비중'}</span>
+            <span class="year-number">${year.label}</span>
+            <span class="year-label-text">${year.active ? '전시 보러가기' : 'Coming Soon'}</span>
+            <span class="year-arrow">→</span>
+          </div>
+          <button class="year-edit-btn" data-yi="${yi}">✏️ 편집</button>
+          <div class="year-submenu">
+            <button class="submenu-btn" data-action="add-track" data-yi="${yi}">+ 트랙 추가</button>
+            <button class="submenu-btn" data-action="toggle-active" data-yi="${yi}">${year.active ? '비활성화' : '활성화'}</button>
+          </div>
+        `;
+
+        // 편집 버튼: 카드 링크 이동 막기
+        card.querySelector('.year-edit-btn').addEventListener('click', e => {
+          e.preventDefault(); e.stopPropagation();
+          editYear(yi);
+        });
+
+        // 서브메뉴 버튼들
+        card.querySelectorAll('.submenu-btn').forEach(btn => {
+          btn.addEventListener('click', e => {
+            e.preventDefault(); e.stopPropagation();
+            const action = btn.dataset.action;
+            if (action === 'add-track') addTrack(yi);
+            if (action === 'toggle-active') toggleYearActive(yi);
+          });
+        });
+
+        container.appendChild(card);
+      });
+
+      // + 연도 추가 카드
+      const addCard = document.createElement('div');
+      addCard.className = 'year-add-card';
+      addCard.innerHTML = `<span class="plus">+</span><span>연도 추가</span>`;
+      addCard.addEventListener('click', addYear);
+      container.appendChild(addCard);
+    }
+
+    // ── 연도 편집 ─────────────────────────────────────────
+    function editYear(yi) {
+      const year = siteData.years[yi];
+      showEditModal({
+        title: `${year.label} 연도 편집`,
+        fields: [
+          { key: 'label', label: '연도 표시 텍스트', value: year.label },
+          { key: 'thumbnail', label: '배경 이미지 URL', value: year.thumbnail || '' },
+        ],
+        onSave(vals) {
+          siteData.years[yi].label = vals.label;
+          siteData.years[yi].thumbnail = vals.thumbnail;
+          saveData(siteData);
+          renderYears();
+        }
+      });
+    }
+
+    // ── 연도 추가 ─────────────────────────────────────────
+    function addYear() {
+      showEditModal({
+        title: '새 연도 추가',
+        fields: [
+          { key: 'id', label: '연도 ID (예: 2027)', value: '' },
+          { key: 'label', label: '연도 표시 텍스트 (예: 2027)', value: '' },
+          { key: 'thumbnail', label: '배경 이미지 URL (선택)', value: '' },
+        ],
+        onSave(vals) {
+          if (!vals.id) return alert('연도 ID를 입력해주세요.');
+          siteData.years.push({ id: vals.id, label: vals.label || vals.id, active: true, thumbnail: vals.thumbnail, tracks: [] });
+          saveData(siteData);
+          renderYears();
+        }
+      });
+    }
+
+    // ── 연도 활성/비활성 ─────────────────────────────────
+    function toggleYearActive(yi) {
+      siteData.years[yi].active = !siteData.years[yi].active;
+      saveData(siteData);
+      renderYears();
+    }
+
+    // ── 트랙 추가 ─────────────────────────────────────────
+    function addTrack(yi) {
+      showEditModal({
+        title: '새 트랙 추가',
+        fields: [
+          { key: 'id', label: '트랙 ID (영문, 예: Games)', value: '' },
+          { key: 'title', label: '트랙 이름 (예: 게임 트랙)', value: '' },
+          { key: 'category', label: '카테고리 태그 (예: Game Track)', value: '' },
+          { key: 'description', label: '트랙 설명', type: 'textarea', value: '' },
+          { key: 'thumbnail', label: '카드 이미지 URL', value: '' },
+          { key: 'bgImage', label: '배경 이미지 URL', value: '' },
+        ],
+        onSave(vals) {
+          if (!vals.id) return alert('트랙 ID를 입력해주세요.');
+          siteData.years[yi].tracks.push({
+            id: vals.id, title: vals.title, category: vals.category,
+            description: vals.description, thumbnail: vals.thumbnail,
+            bgImage: vals.bgImage, bgColor: 'rgba(0,0,0,0.3)', projects: []
+          });
+          saveData(siteData);
+          alert(`"${vals.title}" 트랙이 추가됐습니다.`);
+        }
+      });
+    }
+
+    // ── 관리자 로그인 트리거 ──────────────────────────────
+    document.getElementById('admin-trigger').addEventListener('click', () => {
+      if (isAdmin()) return;
+      showLoginModal(() => {
+        document.body.classList.add('admin-mode');
+        injectAdminBar();
+        renderYears();
+      });
+    });
+
+    init();
+  </script>
 </body>
 </html>

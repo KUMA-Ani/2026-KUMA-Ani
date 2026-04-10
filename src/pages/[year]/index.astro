@@ -1,181 +1,77 @@
 ---
-export async function getStaticPaths() {
-  // site.json에서 연도 목록 가져오기
-  const siteData = await import('../../data/site.json');
+import siteData from '../../data/site.json';
+
+export function getStaticPaths() {
   return siteData.years.map(y => ({ params: { year: y.id } }));
 }
+
 const { year } = Astro.params;
+const yearData = siteData.years.find(y => y.id === year);
+const tracks = yearData?.tracks ?? [];
 ---
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KUMA {year} - 트랙 선택</title>
+  <title>KUMA {year} 졸업 전시회</title>
   <style>
     body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Pretendard', sans-serif; }
 
-    .split-container { display: flex; width: 100%; height: 100vh; flex-direction: row; }
+    .back { position: fixed; top: 20px; left: 24px; z-index: 10; color: rgba(255,255,255,0.4); text-decoration: none; font-size: 1.4rem; transition: color 0.2s; line-height: 1; }
+    .back:hover { color: #fff; }
+
+    .container { display: flex; width: 100%; height: 100vh; }
 
     .track-section { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; overflow: hidden; transition: flex 0.7s cubic-bezier(0.25,1,0.5,1); }
-    .track-section:hover { flex: 1.5; }
+    .track-section:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.08); }
+    .track-section:hover { flex: 1.6; }
 
-    .track-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .track-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.7s cubic-bezier(0.25,1,0.5,1); }
+    .track-section:hover .track-bg { transform: scale(1.04); }
     .track-overlay { position: absolute; inset: 0; }
 
-    .track-content { position: relative; z-index: 2; text-align: center; color: white; }
-    .category-tag { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.6); margin-bottom: 10px; display: block; }
-    .track-title { font-size: 4rem; margin: 0; font-weight: 900; }
-    .track-desc { font-size: 1.1rem; opacity: 0.7; margin-top: 15px; }
-
-    .divider { width: 1px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
-
-    /* 관리자: 편집 버튼 */
-    .track-edit-btn {
-      display: none; position: absolute; top: 16px; right: 16px; z-index: 10;
-      background: rgba(255,193,7,0.85); border: none; border-radius: 8px;
-      padding: 6px 14px; font-size: 0.75rem; color: #000; font-weight: 700; cursor: pointer;
-    }
-    .admin-mode .track-edit-btn { display: block; }
+    .track-content { position: relative; z-index: 2; text-align: center; color: #fff; padding: 20px; }
+    .category-tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.5); margin-bottom: 12px; display: block; }
+    .track-title { font-size: clamp(2rem, 4vw, 4rem); margin: 0; font-weight: 900; line-height: 1.1; }
+    .track-desc { font-size: 0.95rem; opacity: 0.5; margin-top: 12px; line-height: 1.6; max-width: 280px; margin-left: auto; margin-right: auto; }
+    .track-enter { margin-top: 24px; display: inline-block; font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.4); opacity: 0; transform: translateY(6px); transition: opacity 0.3s, transform 0.3s; }
+    .track-section:hover .track-enter { opacity: 1; transform: translateY(0); }
 
     /* 트랙 없을 때 */
-    .empty-state { color: rgba(255,255,255,0.3); text-align: center; font-size: 1.2rem; margin: auto; }
-
-    /* + 트랙 추가 버튼 (관리자) */
-    .add-track-btn {
-      display: none; position: relative; flex: 0 0 120px; flex-direction: column;
-      align-items: center; justify-content: center; gap: 12px;
-      border: 2px dashed rgba(255,255,255,0.2); color: rgba(255,255,255,0.3);
-      cursor: pointer; font-size: 0.85rem; background: transparent; transition: all 0.3s;
-    }
-    .add-track-btn:hover { border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.03); }
-    .admin-mode .add-track-btn { display: flex; }
-    .add-track-btn .plus { font-size: 2.5rem; line-height: 1; }
-
-    /* 뒤로가기 */
-    .back-btn { position: fixed; top: 20px; left: 20px; z-index: 100; color: rgba(255,255,255,0.4); text-decoration: none; font-size: 1.5rem; transition: color 0.2s; }
-    .back-btn:hover { color: #fff; }
+    .empty { display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; color: rgba(255,255,255,0.3); font-size: 1.1rem; flex-direction: column; gap: 12px; }
 
     @media (max-width: 768px) {
       body, html { overflow-y: auto; height: auto; }
-      .split-container { flex-direction: column; padding: 60px 20px 40px; gap: 20px; height: auto; min-height: 100vh; box-sizing: border-box; justify-content: center; }
-      .track-section { flex: none; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; transition: transform 0.3s; }
+      .container { flex-direction: column; height: auto; min-height: 100vh; padding: 70px 20px 40px; gap: 16px; box-sizing: border-box; }
+      .track-section { flex: none; width: 100%; height: 240px; border-radius: 20px; overflow: hidden; border: none !important; transition: transform 0.3s; }
       .track-section:hover { flex: none; transform: scale(1.02); }
-      .track-title { font-size: 2.2rem; }
-      .add-track-btn { flex: none; width: 100%; height: 100px; border-radius: 24px; flex-direction: row; }
+      .track-title { font-size: 2rem; }
     }
   </style>
 </head>
 <body>
-  <a href="/" class="back-btn">⬅</a>
-  <div class="split-container" id="tracks-container"></div>
+  <a href="/" class="back">←</a>
 
-  <script type="module" define:vars={{ year }}>
-    import { isAdmin, showLoginModal, injectAdminBar, getData, saveData, showEditModal } from '/js/admin.js';
-
-    let siteData = null;
-    let yearData = null;
-
-    async function init() {
-      siteData = await getData();
-      yearData = siteData.years.find(y => y.id === year);
-      render();
-      if (isAdmin()) {
-        document.body.classList.add('admin-mode');
-        injectAdminBar();
-      }
-    }
-
-    function render() {
-      const container = document.getElementById('tracks-container');
-      container.innerHTML = '';
-
-      if (!yearData || yearData.tracks.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.textContent = '등록된 트랙이 없습니다. 관리자 모드에서 트랙을 추가해주세요.';
-        container.appendChild(empty);
-      } else {
-        yearData.tracks.forEach((track, ti) => {
-          if (ti > 0) {
-            const div = document.createElement('div');
-            div.className = 'divider';
-            container.appendChild(div);
-          }
-          const section = document.createElement('a');
-          section.className = 'track-section';
-          section.href = `/${year}/track/${track.id}/`;
-          section.innerHTML = `
-            <div class="track-bg" style="background-image:url('${track.bgImage || ''}');"></div>
-            <div class="track-overlay" style="background:linear-gradient(${track.bgColor || 'rgba(0,0,0,0.5)'}, rgba(0,0,0,0.8));"></div>
-            <div class="track-content">
-              <span class="category-tag">${track.category || ''}</span>
-              <h2 class="track-title">${track.title}</h2>
-              <p class="track-desc">${track.description || ''}</p>
-            </div>
-            <button class="track-edit-btn" data-ti="${ti}">✏️ 편집</button>
-          `;
-          section.querySelector('.track-edit-btn').addEventListener('click', e => {
-            e.preventDefault(); e.stopPropagation();
-            editTrack(ti);
-          });
-          container.appendChild(section);
-        });
-      }
-
-      // + 트랙 추가
-      const addBtn = document.createElement('div');
-      addBtn.className = 'add-track-btn';
-      addBtn.innerHTML = `<span class="plus">+</span><span>트랙 추가</span>`;
-      addBtn.addEventListener('click', addTrack);
-      container.appendChild(addBtn);
-    }
-
-    function editTrack(ti) {
-      const track = yearData.tracks[ti];
-      showEditModal({
-        title: `"${track.title}" 트랙 편집`,
-        fields: [
-          { key: 'title', label: '트랙 이름', value: track.title },
-          { key: 'category', label: '카테고리 태그', value: track.category || '' },
-          { key: 'description', label: '설명', type: 'textarea', value: track.description || '' },
-          { key: 'thumbnail', label: '카드 이미지 URL', value: track.thumbnail || '' },
-          { key: 'bgImage', label: '배경 이미지 URL', value: track.bgImage || '' },
-          { key: 'bgColor', label: '오버레이 색상 (예: rgba(0,123,255,0.3))', value: track.bgColor || '' },
-        ],
-        onSave(vals) {
-          const yi = siteData.years.findIndex(y => y.id === year);
-          Object.assign(siteData.years[yi].tracks[ti], vals);
-          saveData(siteData);
-          yearData = siteData.years[yi];
-          render();
-        }
-      });
-    }
-
-    function addTrack() {
-      showEditModal({
-        title: '새 트랙 추가',
-        fields: [
-          { key: 'id', label: '트랙 ID (영문, 예: Games)', value: '' },
-          { key: 'title', label: '트랙 이름', value: '' },
-          { key: 'category', label: '카테고리 태그', value: '' },
-          { key: 'description', label: '설명', type: 'textarea', value: '' },
-          { key: 'thumbnail', label: '카드 이미지 URL', value: '' },
-          { key: 'bgImage', label: '배경 이미지 URL', value: '' },
-          { key: 'bgColor', label: '오버레이 색상', value: 'rgba(0,123,255,0.3)' },
-        ],
-        onSave(vals) {
-          if (!vals.id) return alert('트랙 ID를 입력해주세요.');
-          const yi = siteData.years.findIndex(y => y.id === year);
-          siteData.years[yi].tracks.push({ ...vals, projects: [] });
-          saveData(siteData);
-          yearData = siteData.years[yi];
-          render();
-        }
-      });
-    }
-
-    init();
-  </script>
+  {tracks.length === 0 ? (
+    <div class="empty">
+      <span>등록된 트랙이 없습니다</span>
+      <span style="font-size:0.8rem;">site.json에 트랙을 추가해주세요</span>
+    </div>
+  ) : (
+    <div class="container">
+      {tracks.map(track => (
+        <a href={`/${year}/track/${track.id}/`} class="track-section">
+          {track.bgImage && <div class="track-bg" style={`background-image:url('${track.bgImage}')`}></div>}
+          <div class="track-overlay" style={`background:linear-gradient(${track.bgColor ?? 'rgba(0,0,0,0.4)'}, rgba(0,0,0,0.75))`}></div>
+          <div class="track-content">
+            <span class="category-tag">{track.category}</span>
+            <h2 class="track-title">{track.title}</h2>
+            <p class="track-desc">{track.description}</p>
+            <span class="track-enter">입장하기 →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
 </body>
 </html>

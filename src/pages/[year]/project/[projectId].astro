@@ -1,267 +1,125 @@
 ---
-export async function getStaticPaths() {
-  const siteData = await import('../../../data/site.json');
+import siteData from '../../../data/site.json';
+
+export function getStaticPaths() {
   const paths = [];
-  siteData.years.forEach(y => {
-    y.tracks.forEach(t => {
-      t.projects.forEach(p => {
-        paths.push({ params: { year: y.id, projectId: p.id } });
-      });
-    });
-  });
+  siteData.years.forEach(y =>
+    y.tracks.forEach(t =>
+      t.projects.forEach(p =>
+        paths.push({ params: { year: y.id, projectId: p.id }, props: { project: p, trackId: t.id, trackTitle: t.title } })
+      )
+    )
+  );
   return paths;
 }
+
 const { year, projectId } = Astro.params;
+const { project, trackId, trackTitle } = Astro.props;
 ---
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KUMA - 작품</title>
+  <title>{project?.title} - KUMA {year}</title>
   <style>
     body { background: #000; color: #eee; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px 100px; }
-    .back-btn { display: inline-block; color: #888; text-decoration: none; font-size: 2.5rem; line-height: 1; margin-bottom: 20px; transition: 0.3s; cursor: pointer; }
-    .back-btn:hover { color: #007bff; }
-    .page-header { margin-bottom: 40px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .page-header h1 { font-size: 2.8rem; margin: 0; font-weight: 800; }
-    .subtitle { color: #666; font-size: 1rem; margin-top: 8px; }
+    .container { max-width: 1360px; margin: 0 auto; padding: 40px 40px 100px; }
 
-    /* 관리자 편집 버튼 */
-    .admin-edit-btn {
-      display: none; padding: 10px 20px; background: #ffc107; border: none; border-radius: 10px;
-      color: #000; font-weight: 700; cursor: pointer; font-size: 0.9rem; white-space: nowrap; flex-shrink: 0;
-    }
-    .admin-mode .admin-edit-btn { display: block; }
+    .back { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 1.3rem; display: inline-block; margin-bottom: 24px; transition: color 0.2s; }
+    .back:hover { color: #fff; }
 
-    .content-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px; align-items: start; margin-bottom: 60px; }
-    .video-box iframe { width: 100%; aspect-ratio: 16/9; border-radius: 12px; border: 1px solid #222; display: block; }
-    .download-btn { display: block; width: 100%; box-sizing: border-box; padding: 20px; background: #007bff; color: white; text-align: center; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 1rem; margin-top: 20px; transition: 0.3s; }
+    .page-header { margin-bottom: 40px; }
+    .breadcrumb { font-size: 0.75rem; color: #444; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .breadcrumb span { color: #333; margin: 0 8px; }
+    h1 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 900; margin: 0 0 6px; letter-spacing: -0.5px; }
+    .subtitle { color: #555; font-size: 0.9rem; }
+
+    .layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 28px; margin-bottom: 60px; align-items: start; }
+
+    /* 영상 */
+    .video-wrap iframe { width: 100%; aspect-ratio: 16/9; border-radius: 14px; border: 1px solid #181818; display: block; }
+    .download-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 18px; background: #007bff; color: #fff; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: background 0.2s, transform 0.2s; }
     .download-btn:hover { background: #0069d9; transform: translateY(-2px); }
 
-    .info-card { background: #111; border: 1px solid #222; border-radius: 20px; }
-    .description-card { padding: 36px; margin-bottom: 20px; }
-    .members-card { padding: 32px; }
-    .info-card h2 { font-size: 1.3rem; margin: 0 0 18px; display: flex; align-items: center; font-weight: 700; }
-    .info-card h2::before { content: ''; display: inline-block; width: 4px; height: 1.1rem; background: #007bff; margin-right: 12px; border-radius: 2px; }
-    .description { line-height: 1.8; color: #ccc; font-size: 0.95rem; word-break: keep-all; }
-    .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
-    .member-item { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 12px 8px; text-align: center; }
-    .member-role { font-size: 0.75rem; color: #888; margin-bottom: 4px; display: block; }
-    .member-name { font-size: 1rem; color: #fff; font-weight: 700; display: block; }
+    /* 정보 카드 */
+    .info-col { display: flex; flex-direction: column; gap: 16px; }
+    .card { background: #0d0d0d; border: 1px solid #181818; border-radius: 18px; padding: 28px; }
+    .card-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 3px; color: #444; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .card-label::before { content: ''; display: inline-block; width: 3px; height: 0.9rem; background: #007bff; border-radius: 2px; }
+    .description { line-height: 1.85; color: #aaa; font-size: 0.95rem; word-break: keep-all; }
 
-    /* 관리자: 팀원 편집 */
-    .members-admin-controls { display: none; margin-top: 12px; }
-    .admin-mode .members-admin-controls { display: flex; gap: 8px; flex-wrap: wrap; }
-    .member-add-btn { padding: 6px 14px; background: rgba(0,123,255,0.15); border: 1px solid rgba(0,123,255,0.3); border-radius: 8px; color: #4da6ff; font-size: 0.8rem; cursor: pointer; }
-    .member-del-btn { font-size: 0.65rem; color: #ff6b6b; background: none; border: none; cursor: pointer; display: none; margin-top: 2px; }
-    .admin-mode .member-del-btn { display: block; }
+    /* 제작진 */
+    .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .member { background: #131313; border: 1px solid #1e1e1e; border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .member-role { font-size: 0.68rem; color: #555; display: block; margin-bottom: 4px; }
+    .member-name { font-size: 0.9rem; font-weight: 700; color: #ddd; display: block; }
 
     /* 스크린샷 */
-    .gallery { border-top: 1px solid #222; padding-top: 50px; }
-    .gallery h2 { font-size: 1.3rem; margin: 0 0 24px; display: flex; align-items: center; gap: 12px; }
-    .screenshot-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-    .screenshot-item { position: relative; }
-    .screenshot-item img { width: 100%; border-radius: 12px; border: 1px solid #111; display: block; }
-    .screenshot-del-btn { display: none; position: absolute; top: 10px; right: 10px; background: rgba(220,53,69,0.9); border: none; border-radius: 8px; padding: 4px 10px; color: #fff; font-size: 0.75rem; cursor: pointer; }
-    .admin-mode .screenshot-del-btn { display: block; }
-    .screenshot-add-btn { display: none; width: 100%; padding: 20px; border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; background: transparent; color: rgba(255,255,255,0.3); font-size: 0.9rem; cursor: pointer; transition: all 0.3s; margin-top: 8px; }
-    .screenshot-add-btn:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.5); }
-    .admin-mode .screenshot-add-btn { display: block; }
+    .gallery { border-top: 1px solid #111; padding-top: 48px; }
+    .gallery-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 3px; color: #444; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .gallery-label::before { content: ''; display: inline-block; width: 3px; height: 0.9rem; background: #007bff; border-radius: 2px; }
+    .screenshots { display: flex; flex-direction: column; gap: 20px; }
+    .screenshots img { width: 100%; border-radius: 12px; border: 1px solid #111; display: block; }
 
-    @media (max-width: 1024px) { .content-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 768px) { .container { padding: 24px 16px 100px; } .page-header h1 { font-size: 2rem; } }
+    @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .container { padding: 28px 18px 80px; } h1 { font-size: 1.8rem; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <a class="back-btn" onclick="history.back()" title="뒤로가기">ᗕ</a>
+    <a href={`/${year}/track/${trackId}/`} class="back">← {trackTitle}</a>
 
     <div class="page-header">
-      <div>
-        <h1 id="p-title">로딩 중...</h1>
-        <p class="subtitle" id="p-subtitle"></p>
-      </div>
-      <button class="admin-edit-btn" id="edit-basic-btn">✏️ 기본 정보 편집</button>
+      <p class="breadcrumb">{year} <span>/</span> {trackTitle} <span>/</span> {project?.type === 'team' ? 'Team' : 'Individual'}</p>
+      <h1>{project?.title}</h1>
+      <p class="subtitle">{project?.team}</p>
     </div>
 
-    <div class="content-layout">
-      <div class="left-col">
-        <div class="video-box" id="video-box"></div>
-        <a id="download-btn" href="#" class="download-btn" style="display:none;">🎮 게임 다운로드하기!</a>
+    <div class="layout">
+      <div class="video-wrap">
+        {project?.youtubeId
+          ? <iframe src={`https://www.youtube.com/embed/${project.youtubeId}`} frameborder="0" allowfullscreen></iframe>
+          : <div style="aspect-ratio:16/9;background:#0d0d0d;border-radius:14px;border:1px solid #181818;display:flex;align-items:center;justify-content:center;color:#333;">영상 없음</div>
+        }
+        {project?.downloadUrl && (
+          <a href={project.downloadUrl} class="download-btn" target="_blank" rel="noopener">
+            🎮 게임 다운로드
+          </a>
+        )}
       </div>
-      <div class="right-col">
-        <div class="info-card description-card">
-          <h2>작품 개요</h2>
-          <div class="description" id="p-description"></div>
+
+      <div class="info-col">
+        <div class="card">
+          <p class="card-label">작품 개요</p>
+          <p class="description">{project?.description ?? '설명이 없습니다.'}</p>
         </div>
-        <div class="info-card members-card">
-          <h2>제작진</h2>
-          <div class="members-grid" id="members-grid"></div>
-          <div class="members-admin-controls">
-            <button class="member-add-btn" id="member-add-btn">+ 팀원 추가</button>
+
+        {project?.members && project.members.length > 0 && (
+          <div class="card">
+            <p class="card-label">제작진</p>
+            <div class="members-grid">
+              {project.members.map(m => (
+                <div class="member">
+                  <span class="member-role">{m.role}</span>
+                  <span class="member-name">{m.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
 
-    <div class="gallery">
-      <h2>스크린샷</h2>
-      <div class="screenshot-grid" id="screenshot-grid"></div>
-      <button class="screenshot-add-btn" id="screenshot-add-btn">+ 스크린샷 URL 추가</button>
-    </div>
+    {project?.screenshots && project.screenshots.length > 0 && (
+      <div class="gallery">
+        <p class="gallery-label">스크린샷</p>
+        <div class="screenshots">
+          {project.screenshots.map((src, i) => (
+            <img src={src} alt={`Screenshot ${i + 1}`} loading="lazy" />
+          ))}
+        </div>
+      </div>
+    )}
   </div>
-
-  <script type="module" define:vars={{ year, projectId }}>
-    import { isAdmin, injectAdminBar, getData, saveData, showEditModal } from '/js/admin.js';
-
-    let siteData, project, yi, ti, pi;
-
-    async function init() {
-      siteData = await getData();
-      // 프로젝트 찾기
-      outer: for (let y = 0; y < siteData.years.length; y++) {
-        for (let t = 0; t < siteData.years[y].tracks.length; t++) {
-          const idx = siteData.years[y].tracks[t].projects.findIndex(p => p.id === projectId);
-          if (idx !== -1) { yi = y; ti = t; pi = idx; break outer; }
-        }
-      }
-      project = siteData.years[yi]?.tracks[ti]?.projects[pi];
-      render();
-      if (isAdmin()) { document.body.classList.add('admin-mode'); injectAdminBar(); }
-    }
-
-    function render() {
-      if (!project) { document.getElementById('p-title').textContent = '작품을 찾을 수 없습니다.'; return; }
-
-      document.title = `${project.title} - KUMA`;
-      document.getElementById('p-title').textContent = project.title;
-      document.getElementById('p-subtitle').textContent = `${project.team || ''} | ${project.type === 'team' ? 'TEAM PROJECT' : 'INDIVIDUAL'}`;
-      document.getElementById('p-description').textContent = project.description || '';
-
-      // 영상
-      const vbox = document.getElementById('video-box');
-      if (project.youtubeId) {
-        vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${project.youtubeId}" frameborder="0" allowfullscreen></iframe>`;
-      } else {
-        vbox.innerHTML = `<div style="aspect-ratio:16/9;background:#111;border-radius:12px;border:1px solid #222;display:flex;align-items:center;justify-content:center;color:#555;">영상 없음</div>`;
-      }
-
-      // 다운로드
-      const dlBtn = document.getElementById('download-btn');
-      if (project.downloadUrl && siteData.years[yi].tracks[ti].id.toLowerCase().includes('game')) {
-        dlBtn.style.display = 'block';
-        dlBtn.href = project.downloadUrl;
-      } else { dlBtn.style.display = 'none'; }
-
-      // 팀원
-      renderMembers();
-
-      // 스크린샷
-      renderScreenshots();
-
-      // 편집 버튼
-      document.getElementById('edit-basic-btn').onclick = editBasic;
-      document.getElementById('member-add-btn').onclick = addMember;
-      document.getElementById('screenshot-add-btn').onclick = addScreenshot;
-    }
-
-    function renderMembers() {
-      const grid = document.getElementById('members-grid');
-      grid.innerHTML = '';
-      (project.members || []).forEach((m, mi) => {
-        const div = document.createElement('div');
-        div.className = 'member-item';
-        div.innerHTML = `
-          <span class="member-role">${m.role}</span>
-          <span class="member-name">${m.name}</span>
-          <button class="member-del-btn" data-mi="${mi}">✕ 삭제</button>
-        `;
-        div.querySelector('.member-del-btn').onclick = () => deleteMember(mi);
-        grid.appendChild(div);
-      });
-    }
-
-    function renderScreenshots() {
-      const grid = document.getElementById('screenshot-grid');
-      grid.innerHTML = '';
-      (project.screenshots || []).forEach((src, si) => {
-        const div = document.createElement('div');
-        div.className = 'screenshot-item';
-        div.innerHTML = `
-          <img src="${src}" alt="Screenshot ${si+1}" loading="lazy" />
-          <button class="screenshot-del-btn" data-si="${si}">🗑 삭제</button>
-        `;
-        div.querySelector('.screenshot-del-btn').onclick = () => deleteScreenshot(si);
-        grid.appendChild(div);
-      });
-    }
-
-    function save() {
-      siteData.years[yi].tracks[ti].projects[pi] = project;
-      saveData(siteData);
-    }
-
-    function editBasic() {
-      showEditModal({
-        title: '기본 정보 편집',
-        fields: [
-          { key: 'title', label: '작품 제목', value: project.title },
-          { key: 'team', label: '팀명 / 작가명', value: project.team || '' },
-          { key: 'description', label: '작품 설명', type: 'textarea', value: project.description || '' },
-          { key: 'youtubeId', label: '유튜브 영상 ID', value: project.youtubeId || '' },
-          { key: 'thumbnail', label: '썸네일 이미지 URL', value: project.thumbnail || '' },
-          { key: 'downloadUrl', label: '다운로드 링크', value: project.downloadUrl || '' },
-        ],
-        onSave(vals) {
-          Object.assign(project, vals);
-          save(); render();
-        }
-      });
-    }
-
-    function addMember() {
-      showEditModal({
-        title: '팀원 추가',
-        fields: [
-          { key: 'role', label: '역할 (예: 프로그래밍)', value: '' },
-          { key: 'name', label: '이름', value: '' },
-        ],
-        onSave(vals) {
-          if (!vals.name) return;
-          if (!project.members) project.members = [];
-          project.members.push(vals);
-          save(); renderMembers();
-        }
-      });
-    }
-
-    function deleteMember(mi) {
-      if (!confirm('팀원을 삭제하시겠습니까?')) return;
-      project.members.splice(mi, 1);
-      save(); renderMembers();
-    }
-
-    function addScreenshot() {
-      showEditModal({
-        title: '스크린샷 추가',
-        fields: [{ key: 'url', label: '이미지 URL', value: '' }],
-        onSave(vals) {
-          if (!vals.url) return;
-          if (!project.screenshots) project.screenshots = [];
-          project.screenshots.push(vals.url);
-          save(); renderScreenshots();
-        }
-      });
-    }
-
-    function deleteScreenshot(si) {
-      if (!confirm('스크린샷을 삭제하시겠습니까?')) return;
-      project.screenshots.splice(si, 1);
-      save(); renderScreenshots();
-    }
-
-    init();
-  </script>
 </body>
 </html>

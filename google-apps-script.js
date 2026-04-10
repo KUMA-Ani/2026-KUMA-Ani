@@ -4,7 +4,7 @@
 // ============================================================
 
 // ▼ 여기에 Vercel Deploy Hook URL을 입력하세요
-const VERCEL_DEPLOY_HOOK = 'https://api.vercel.com/v1/integrations/deploy/prj_qFJjJdvDlqsaUpJVi0Pf5yRznVgD/Hk35AUXkpt';
+const VERCEL_DEPLOY_HOOK = 'https://api.vercel.com/v1/integrations/deploy/여기에URL입력';
 
 // 마지막 배포로부터 최소 대기 시간 (초) - 연속 저장 시 과도한 배포 방지
 const DEPLOY_COOLDOWN_SEC = 30;

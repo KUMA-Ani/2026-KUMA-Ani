@@ -1,0 +1,64 @@
+---
+import projects from '../../../data/projects.json';
+const { id } = Astro.params;
+
+export function getStaticPaths() {
+  return [{ params: { id: 'Games' } }, { params: { id: 'Animations' } }];
+}
+
+const trackProjects = projects.filter(p => p.track === id);
+const teamProjects = trackProjects.filter(p => p.type === 'team');
+const individualProjects = trackProjects.filter(p => p.type === 'individual');
+---
+
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>{id} - KUMA Exhibition</title>
+    <style>
+        body { background: #0b0b0b; color: #eee; font-family: 'Pretendard', sans-serif; padding: 50px; }
+        .back { color: #555; text-decoration: none; margin-bottom: 20px; display: block; }
+        h1 { font-size: 3rem; margin-bottom: 50px; font-weight: 800; letter-spacing: -1px; }
+        h2 { font-size: 1.5rem; color: #007bff; margin-top: 60px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
+        .card { background: #161616; border-radius: 15px; overflow: hidden; text-decoration: none; color: white; transition: 0.3s; border: 1px solid #222; }
+        .card:hover { transform: translateY(-10px); border-color: #007bff; box-shadow: 0 10px 30px rgba(0,123,255,0.2); }
+        
+        .thumb { width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; background-color: #333; }
+        .info { padding: 20px; }
+        .info h3 { margin: 0; font-size: 1.2rem; }
+        .info p { color: #888; font-size: 0.9rem; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <a href="/2026/" class="back">⬅ 돌아가기</a>
+    <h1>{id === 'Games' ? 'Game Track' : 'Animation Track'}</h1>
+
+    {teamProjects.length > 0 && (
+        <h2>Team Projects</h2>
+        <div class="grid">
+            {teamProjects.map(p => (
+                /* 수정: /2026-KUMA-Ani/ 제거 */
+                <a href={`/2026/project/${p.id}/`} class="card">
+                    <div class="thumb" style={`background-image: url('/images/sample.jpg')`}></div>
+                    <div class="info"><h3>{p.title}</h3><p>{p.team}</p></div>
+                </a>
+            ))}
+        </div>
+    )}
+
+    {individualProjects.length > 0 && (
+        <h2>Individual Projects</h2>
+        <div class="grid">
+            {individualProjects.map(p => (
+                /* 수정: /2026-KUMA-Ani/ 제거 */
+                <a href={`/2026/project/${p.id}/`} class="card">
+                    <div class="thumb" style={`background-image: url('/images/sample.jpg')`}></div>
+                    <div class="info"><h3>{p.title}</h3><p>{p.team}</p></div>
+                </a>
+            ))}
+        </div>
+    )}
+</body>
+</html>

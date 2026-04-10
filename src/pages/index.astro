@@ -1,108 +1,200 @@
 ---
-import projects from '../data/projects.json';
-
-const tracks = projects.filter(p => p.category);
-const gameTrack = tracks.find(t => t.id === 'Games');
-const animationTrack = tracks.find(t => t.id === 'Animations');
+const years = [
+  { year: 2026, active: true }
+];
 ---
 
 <html lang="ko">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KUMA 졸업 전시회 - 트랙 선택</title>
+    <title>KUMA 졸업 전시회</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Pretendard', sans-serif; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* 기본 레이아웃: 가로 배치 */
-        .split-container { display: flex; width: 100%; height: 100vh; flex-direction: row; }
+        body, html {
+            width: 100%; height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: 'Pretendard', 'Inter', sans-serif;
+            overflow: hidden;
+        }
 
-        .track-section { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; text-decoration: none; overflow: hidden; transition: flex 0.7s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bg {
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(0, 80, 200, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(180, 30, 60, 0.10) 0%, transparent 60%),
+                #000;
+            z-index: 0;
+        }
 
-        .game { background: linear-gradient(rgba(0, 123, 255, 0.3), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; border-right: 1px solid rgba(255, 255, 255, 0.1); }
-        .animation { background: linear-gradient(rgba(220, 53, 69, 0.3), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
 
-        .track-section:hover { flex: 1.5; }
-        .track-content { position: relative; z-index: 2; text-align: center; color: white; transition: transform 0.3s ease; }
-        .category-tag { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 4px; color: rgba(255, 255, 255, 0.6); margin-bottom: 10px; display: block; }
-        h2 { font-size: 4rem; margin: 0; font-weight: 900; }
-        .description { font-size: 1.1rem; opacity: 0.7; margin-top: 15px; }
+        .page {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            width: 100%; height: 100vh;
+            gap: 60px;
+        }
 
-/* ✨ 모바일 반응형: 카드 스타일 디자인 */
-        @media (max-width: 768px) {
-            body, html { 
-                overflow-y: auto; /* 카드 리스트가 길어질 수 있으므로 스크롤 허용 */
-                height: auto;
-                background-color: #000;
-            }
+        .header { text-align: center; }
 
-            .split-container { 
-                flex-direction: column; 
-                padding: 40px 20px; /* 상하좌우 여백 */
-                gap: 20px; /* 카드 사이 간격 */
-                height: auto;
-                min-height: 100vh;
-                box-sizing: border-box;
-                justify-content: center; /* 중앙 배치 */
-            }
+        .header .label {
+            font-size: 0.8rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 16px;
+        }
 
-            .track-section { 
-                flex: none;
-                width: 100%; 
-                height: 250px; /* 카드의 고정 높이 */
-                border-radius: 24px; /* 둥근 모서리 */
-                /* 테두리를 더 어둡게 조정해 깊이감 부여 */
-                border: 1px solid rgba(255, 255, 255, 0.05);
-                margin-bottom: 0;
-                overflow: hidden; /* 테두리 밖으로 배경이 넘치지 않게 */
-                
-                /* 호버 시 늘어나는 효과 대신 살짝 커지는 효과로 변경 */
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
+        .header h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-            .track-section:hover { 
-                flex: none; 
-                transform: scale(1.02);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            }
+        .header .sub {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.3);
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
 
-            /* 모바일 텍스트 크기 최적화 */
-            h2 { font-size: 2.2rem; }
-            .category-tag { font-size: 0.7rem; letter-spacing: 2px; }
-            .description { font-size: 0.9rem; margin-top: 8px; }
+        .years-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 0 20px;
+        }
 
-            /* 카드용 그라데이션 재설정 (왼쪽은 어둡고 오른쪽은 밝게) */
-            .game { 
-                background: linear-gradient(to right, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.3) 100%), 
-                            url('https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80');
-                background-size: cover;
-                background-position: center;
-            }
-            .animation { 
-                background: linear-gradient(to right, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 50%, rgba(0, 0, 0, 0.3) 100%), 
-                            url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80');
-                background-size: cover;
-                background-position: center;
-            }
+        .year-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 220px;
+            height: 280px;
+            border-radius: 24px;
+            text-decoration: none;
+            color: white;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease;
+        }
+
+        .year-card.active {
+            border: 1px solid rgba(255,255,255,0.15);
+            background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5);
+            cursor: pointer;
+        }
+
+        .year-card.active::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%);
+        }
+
+        .year-card.active:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 0 0 1px rgba(100,160,255,0.2), 0 40px 80px rgba(0,80,200,0.25);
+        }
+
+        .year-badge {
+            position: absolute;
+            top: 18px; right: 18px;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: rgba(100,200,255,0.8);
+            background: rgba(0,100,255,0.12);
+            border: 1px solid rgba(0,100,255,0.2);
+        }
+
+        .year-number {
+            font-size: 4.5rem;
+            font-weight: 900;
+            letter-spacing: -4px;
+            line-height: 1;
+            position: relative; z-index: 1;
+            background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .year-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 10px;
+            letter-spacing: 1px;
+            position: relative; z-index: 1;
+        }
+
+        .arrow {
+            position: absolute;
+            bottom: 22px;
+            font-size: 1.2rem;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .year-card.active:hover .arrow { opacity: 1; transform: translateY(0); }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 600px) {
+            .year-card { width: 160px; height: 220px; }
+            .year-number { font-size: 3.2rem; }
         }
     </style>
 </head>
 <body>
-    <div class="split-container">
-        <a href="/track/Games/" class="track-section game">
-            <div class="track-content">
-                <span class="category-tag">Game Track</span>
-                <h2>{gameTrack?.title || "GAME"}</h2>
-                <p class="description">인터랙티브한 미래를 설계하다</p>
-            </div>
-        </a>
-        <a href="/track/Animations/" class="track-section animation">
-            <div class="track-content">
-                <span class="category-tag">Animation Track</span>
-                <h2>{animationTrack?.title || "ANIMATION"}</h2>
-                <p class="description">상상을 움직임으로 구현하다</p>
-            </div>
-        </a>
+    <div class="bg"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="page">
+        <div class="header">
+            <p class="label">KUMA · Game & Animation</p>
+            <h1>졸업 전시회</h1>
+            <p class="sub">연도를 선택해 전시관에 입장하세요</p>
+        </div>
+
+        <div class="years-container">
+            {years.map(({ year, active }) => (
+                <a href={active ? `/${year}/` : undefined} class={`year-card ${active ? 'active' : 'inactive'}`} style={!active ? 'pointer-events:none;opacity:0.3;' : ''}>
+                    <span class="year-badge">{active ? 'OPEN' : '준비중'}</span>
+                    <span class="year-number">{year}</span>
+                    <span class="year-desc">{active ? '전시 보러가기' : 'Coming Soon'}</span>
+                    {active && <span class="arrow">→</span>}
+                </a>
+            ))}
+        </div>
+
+        <p class="footer-text">국민대학교 게임애니메이션과</p>
     </div>
 </body>
 </html>

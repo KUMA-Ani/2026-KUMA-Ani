@@ -1,9 +1,11 @@
 ---
-import siteData from '../../../data/site.json';
+import { fetchSiteData } from '../../../lib/fetchSheetData';
 
-export function getStaticPaths() {
-  const paths = [];
-  siteData.years.forEach(y =>
+export async function getStaticPaths() {
+  const { fetchSiteData } = await import('../../../lib/fetchSheetData');
+  const { years } = await fetchSiteData();
+  const paths: any[] = [];
+  years.forEach(y =>
     y.tracks.forEach(t =>
       paths.push({ params: { year: y.id, trackId: t.id } })
     )
@@ -12,10 +14,12 @@ export function getStaticPaths() {
 }
 
 const { year, trackId } = Astro.params;
-const yearData = siteData.years.find(y => y.id === year);
+const { years } = await fetchSiteData();
+const yearData = years.find(y => y.id === year);
 const track = yearData?.tracks.find(t => t.id === trackId);
 const teamProjects = track?.projects.filter(p => p.type === 'team') ?? [];
 const indivProjects = track?.projects.filter(p => p.type === 'individual') ?? [];
+const showTrackNav = (yearData?.trackCount ?? 1) > 1;
 ---
 <html lang="ko">
 <head>
@@ -28,24 +32,25 @@ const indivProjects = track?.projects.filter(p => p.type === 'individual') ?? []
     .back:hover { color: #fff; }
     .page-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin: 0 0 6px; letter-spacing: -1px; }
     .page-sub { color: #444; font-size: 0.85rem; margin-bottom: 56px; letter-spacing: 2px; text-transform: uppercase; }
-
     .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: #444; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #111; }
     .section + .section { margin-top: 56px; }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 0; }
-
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .card { background: #101010; border: 1px solid #1a1a1a; border-radius: 14px; overflow: hidden; text-decoration: none; color: #fff; display: block; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
     .card:hover { border-color: #333; transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
     .thumb { width: 100%; aspect-ratio: 16/9; background: #1a1a1a; background-size: cover; background-position: center; }
     .card-body { padding: 16px 18px; }
     .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
     .card-team { font-size: 0.8rem; color: #555; }
-
+    .empty { color: #333; margin-top: 40px; font-size: 0.9rem; }
     @media (max-width: 768px) { body { padding: 32px 20px 60px; } .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; } }
   </style>
 </head>
 <body>
-  <a href={`/${year}/`} class="back">← 트랙 선택</a>
+  <!-- 트랙이 여러 개면 트랙 선택으로, 1개면 연도 메인으로 -->
+  <a href={showTrackNav ? `/${year}/` : '/'} class="back">
+    {showTrackNav ? '← 트랙 선택' : '← 메인'}
+  </a>
+
   <h1 class="page-title">{track?.title ?? trackId}</h1>
   <p class="page-sub">{year} · {track?.category ?? ''}</p>
 
@@ -55,7 +60,7 @@ const indivProjects = track?.projects.filter(p => p.type === 'individual') ?? []
       <div class="grid">
         {teamProjects.map(p => (
           <a href={`/${year}/project/${p.id}/`} class="card">
-            <div class="thumb" style={`background-image:url('${p.thumbnail || ''}')`}></div>
+            <div class="thumb" style={p.thumbnail ? `background-image:url('${p.thumbnail}')` : ''}></div>
             <div class="card-body">
               <p class="card-title">{p.title}</p>
               <p class="card-team">{p.team}</p>
@@ -72,7 +77,7 @@ const indivProjects = track?.projects.filter(p => p.type === 'individual') ?? []
       <div class="grid">
         {indivProjects.map(p => (
           <a href={`/${year}/project/${p.id}/`} class="card">
-            <div class="thumb" style={`background-image:url('${p.thumbnail || ''}')`}></div>
+            <div class="thumb" style={p.thumbnail ? `background-image:url('${p.thumbnail}')` : ''}></div>
             <div class="card-body">
               <p class="card-title">{p.title}</p>
               <p class="card-team">{p.team}</p>
@@ -84,7 +89,7 @@ const indivProjects = track?.projects.filter(p => p.type === 'individual') ?? []
   )}
 
   {teamProjects.length === 0 && indivProjects.length === 0 && (
-    <p style="color:#333;margin-top:40px;">등록된 작품이 없습니다.</p>
+    <p class="empty">등록된 작품이 없습니다.</p>
   )}
 </body>
 </html>

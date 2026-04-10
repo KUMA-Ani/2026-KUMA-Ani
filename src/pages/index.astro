@@ -1,6 +1,6 @@
 ---
-import siteData from '../data/site.json';
-const years = siteData.years;
+import { fetchSiteData } from '../lib/fetchSheetData';
+const { years } = await fetchSiteData();
 ---
 <html lang="ko">
 <head>
@@ -17,26 +17,20 @@ const years = siteData.years;
     .label { font-size: 0.8rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; display: block; }
     h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; letter-spacing: -2px; line-height: 1; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .sub { font-size: 1rem; color: rgba(255,255,255,0.3); margin-top: 12px; }
-
     .years-container { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center; padding: 0 20px; }
-
-    .year-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 220px; height: 280px; border-radius: 24px; text-decoration: none; color: white; overflow: hidden; transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s ease; border: 1px solid rgba(255,255,255,0.15); background: linear-gradient(145deg, #111 0%, #0a0a0a 100%); box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5); cursor: pointer; }
+    .year-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 220px; height: 280px; border-radius: 24px; text-decoration: none; color: white; overflow: hidden; transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s ease; border: 1px solid rgba(255,255,255,0.15); background: linear-gradient(145deg, #111 0%, #0a0a0a 100%); box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5); }
     .year-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%); }
     .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
     .year-card:not(.inactive):hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 0 0 1px rgba(100,160,255,0.2), 0 40px 80px rgba(0,80,200,0.25); }
     .year-card.inactive { opacity: 0.35; pointer-events: none; }
-
     .year-badge { position: absolute; top: 18px; right: 18px; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; z-index: 1; }
     .year-badge.open { color: rgba(100,200,255,0.9); background: rgba(0,100,255,0.12); border: 1px solid rgba(0,100,255,0.25); }
     .year-badge.closed { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
-
     .year-number { font-size: 4.5rem; font-weight: 900; letter-spacing: -4px; line-height: 1; position: relative; z-index: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .year-desc { font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-top: 8px; position: relative; z-index: 1; }
     .year-arrow { position: absolute; bottom: 22px; font-size: 1.2rem; opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; z-index: 1; }
     .year-card:not(.inactive):hover .year-arrow { opacity: 1; transform: translateY(0); }
-
     .footer-text { font-size: 0.75rem; color: rgba(255,255,255,0.12); letter-spacing: 3px; text-transform: uppercase; }
-
     @media (max-width: 600px) {
       body, html { overflow-y: auto; }
       .page { height: auto; min-height: 100vh; padding: 60px 20px; }
@@ -54,13 +48,11 @@ const years = siteData.years;
       <h1>졸업 전시회</h1>
       <p class="sub">연도를 선택해 전시관에 입장하세요</p>
     </div>
-
     <div class="years-container">
       {years.map(year => (
         <a
           href={year.active ? `/${year.id}/` : undefined}
           class={`year-card${year.active ? '' : ' inactive'}`}
-          aria-disabled={!year.active}
         >
           {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
           <span class={`year-badge ${year.active ? 'open' : 'closed'}`}>{year.active ? 'OPEN' : '준비중'}</span>
@@ -70,7 +62,6 @@ const years = siteData.years;
         </a>
       ))}
     </div>
-
     <p class="footer-text">국민대학교 게임애니메이션과</p>
   </div>
 </body>

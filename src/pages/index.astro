@@ -187,7 +187,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       background: #111;
       flex-shrink: 0;
     }
-    .map-section iframe { width: 100%; height: 100%; border: none; display: block; filter: invert(90%) hue-rotate(180deg); }
+    .map-section iframe { width: 100%; height: 100%; border: none; display: block; }
     .map-placeholder {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -408,7 +408,15 @@ const pastYears = years.filter(y => y.active && !y.current);
       <!-- 지도 -->
       <div class="map-section">
         {info.mapUrl
-          ? <iframe src={info.mapUrl} allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          ? <iframe
+              src={info.mapUrl}
+              width="100%"
+              height="100%"
+              style="border:0;"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
           : (
             <div class="map-placeholder">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>

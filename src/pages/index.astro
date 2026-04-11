@@ -1,6 +1,6 @@
 ---
 import { fetchSiteData } from '../lib/fetchSheetData';
-const { years } = await fetchSiteData();
+const { years, info } = await fetchSiteData();
 const currentYears = years.filter(y => y.active && y.current);
 const pastYears = years.filter(y => y.active && !y.current);
 ---
@@ -14,140 +14,311 @@ const pastYears = years.filter(y => y.active && !y.current);
     html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
     body { background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; height: 100%; }
 
-    /* 섹션 공통 */
-    .section {
+    /* ── 상단 바 ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+    }
+    .topbar-logos { display: flex; align-items: center; gap: 16px; }
+    .topbar-logo { height: 28px; width: auto; object-fit: contain; opacity: 0.85; }
+    .topbar-logo-fallback {
+      height: 28px; display: flex; align-items: center;
+      font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.6);
+      letter-spacing: 1px;
+    }
+    .topbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.12); }
+    .topbar-links { display: flex; align-items: center; gap: 8px; }
+    .topbar-link {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; transition: background 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .topbar-link:hover { background: rgba(255,255,255,0.1); }
+    .topbar-link svg { width: 16px; height: 16px; fill: rgba(255,255,255,0.7); }
+
+    /* ── 현재 전시 섹션 ── */
+    .current-section {
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      min-height: 100vh;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      padding-top: 52px;
+      position: relative;
+    }
+
+    /* 좌측 메인 비주얼 */
+    .main-visual {
+      position: relative;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
-      padding: 60px 20px;
+      padding: 48px;
+      background: #000;
+    }
+    .main-bg {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+      opacity: 0.35;
+    }
+    .main-bg-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(0,50,180,0.6) 0%, rgba(100,0,60,0.4) 100%);
+    }
+    .main-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
     }
 
-    /* 배경 */
-    .bg-current {
-      background:
-        radial-gradient(ellipse at 20% 50%, rgba(0,80,200,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 50%, rgba(180,30,60,0.10) 0%, transparent 60%),
-        #000;
-    }
-    .bg-past { background: #060606; }
+    .main-content { position: relative; z-index: 2; text-align: center; width: 100%; }
+    .main-label { font-size: 0.72rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 16px; display: block; }
+    .main-title { font-size: clamp(3.5rem, 7vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 0.95; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
+    .main-year { font-size: clamp(1rem, 2vw, 1.4rem); color: rgba(255,255,255,0.35); letter-spacing: 4px; margin-bottom: 48px; font-weight: 300; }
 
-    .grid-overlay {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
-
-    .section-inner { position: relative; z-index: 1; width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 48px; }
-
-    /* 헤더 */
-    .header { text-align: center; }
-    .label { font-size: 0.75rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 14px; display: block; }
-    h1 { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; letter-spacing: -3px; line-height: 1; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .sub { font-size: 1rem; color: rgba(255,255,255,0.3); margin-top: 10px; }
-
-    /* 현재 전시 카드 - 정사각형 */
-    .current-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    /* 연도 카드들 */
+    .year-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
     .year-card {
-      position: relative;
-      width: 240px; height: 240px;
-      border-radius: 28px;
-      text-decoration: none; color: #fff;
-      overflow: hidden;
-      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 48px rgba(0,0,0,0.6);
+      width: 180px; height: 180px; border-radius: 24px;
+      text-decoration: none; color: #fff; overflow: hidden;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(8px);
+      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s, background 0.3s;
     }
-    .year-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%); }
+    .year-card:hover { transform: translateY(-10px) scale(1.04); background: rgba(255,255,255,0.1); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
     .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
-    .year-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 0 0 1px rgba(100,160,255,0.25), 0 40px 80px rgba(0,80,200,0.3); }
-    .year-badge { position: absolute; top: 16px; right: 16px; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; z-index: 1; color: rgba(100,200,255,0.9); background: rgba(0,100,255,0.12); border: 1px solid rgba(0,100,255,0.25); }
-    .year-number { font-size: 5rem; font-weight: 900; letter-spacing: -5px; line-height: 1; position: relative; z-index: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .year-desc { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 6px; position: relative; z-index: 1; letter-spacing: 1px; }
-    .year-arrow { position: absolute; bottom: 18px; font-size: 1rem; opacity: 0; transform: translateY(4px); transition: 0.3s; z-index: 1; }
+    .year-badge { position: absolute; top: 12px; right: 12px; font-size: 0.55rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); z-index: 1; }
+    .year-num { font-size: 4rem; font-weight: 900; letter-spacing: -4px; position: relative; z-index: 1; line-height: 1; }
+    .year-desc { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 6px; position: relative; z-index: 1; letter-spacing: 1px; }
+    .year-arrow { position: absolute; bottom: 14px; font-size: 0.9rem; opacity: 0; transform: translateY(4px); transition: 0.3s; z-index: 1; }
     .year-card:hover .year-arrow { opacity: 1; transform: translateY(0); }
+
+    /* 우측 패널 */
+    .side-panel {
+      border-left: 1px solid rgba(255,255,255,0.07);
+      background: #080808;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* 전시 개요 */
+    .exhibit-info {
+      flex: 1;
+      padding: 36px 32px;
+      display: flex; flex-direction: column; justify-content: center;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      overflow-y: auto;
+    }
+    .info-tag { font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 20px; display: block; font-weight: 600; }
+    .exhibit-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.3; letter-spacing: -0.5px; }
+    .info-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+    .info-icon { font-size: 0.85rem; margin-top: 1px; flex-shrink: 0; opacity: 0.6; }
+    .info-text { font-size: 0.85rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; }
+    .exhibit-desc { font-size: 0.83rem; color: rgba(255,255,255,0.5); line-height: 1.8; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
+
+    /* 지도 */
+    .map-section {
+      height: 240px;
+      position: relative;
+      background: #111;
+      flex-shrink: 0;
+    }
+    .map-section iframe { width: 100%; height: 100%; border: none; display: block; filter: invert(90%) hue-rotate(180deg); }
+    .map-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; color: rgba(255,255,255,0.2); font-size: 0.8rem;
+    }
+    .map-placeholder svg { opacity: 0.3; }
+    .map-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: flex-end; padding: 14px 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+    }
+    .map-link {
+      font-size: 0.72rem; color: rgba(255,255,255,0.6); text-decoration: none;
+      letter-spacing: 2px; text-transform: uppercase; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .map-link:hover { color: #fff; }
 
     /* 스크롤 힌트 */
     .scroll-hint {
-      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      color: rgba(255,255,255,0.2); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;
-      animation: bounce 2s infinite;
+      position: absolute; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: rgba(255,255,255,0.2); font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
+      animation: bounce 2.5s infinite; pointer-events: none; z-index: 10;
     }
-    .scroll-hint svg { opacity: 0.4; }
-    @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
+    @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 60% { transform: translateX(-50%) translateY(8px); } }
 
-    /* 과거 전시 섹션 */
-    .past-header { text-align: center; width: 100%; }
-    .past-label { font-size: 0.7rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.25); display: block; margin-bottom: 10px; }
-    .past-title { font-size: 1.4rem; font-weight: 700; color: rgba(255,255,255,0.5); }
-    .past-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 16px auto 0; }
+    /* ── 과거 전시 섹션 ── */
+    .past-section {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-height: 100vh;
+      padding: 100px 60px 80px;
+      background: #050505;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 48px;
+    }
+    .past-header { text-align: center; }
+    .past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 10px; }
+    .past-heading { font-size: 2rem; font-weight: 700; color: rgba(255,255,255,0.45); }
+    .past-line { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 16px auto 0; }
 
-    /* 과거 카드 - 더 작고 가로형 */
     .past-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
     .past-card {
-      position: relative;
-      width: 160px; height: 160px;
-      border-radius: 20px;
-      text-decoration: none; color: #fff;
-      overflow: hidden;
-      transition: transform 0.3s, box-shadow 0.3s, opacity 0.3s;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: #0d0d0d;
+      width: 150px; height: 150px; border-radius: 20px;
+      text-decoration: none; color: #fff; overflow: hidden;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      opacity: 0.65;
+      position: relative; border: 1px solid rgba(255,255,255,0.07);
+      background: #0d0d0d; opacity: 0.6;
+      transition: transform 0.3s, opacity 0.3s, box-shadow 0.3s;
     }
-    .past-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); opacity: 1; }
-    .past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.12; }
-    .past-year-num { font-size: 3rem; font-weight: 900; letter-spacing: -3px; position: relative; z-index: 1; color: rgba(255,255,255,0.7); }
-    .past-year-label { font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 1; }
+    .past-card:hover { transform: translateY(-6px); opacity: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.15; }
+    .past-num { font-size: 2.8rem; font-weight: 900; letter-spacing: -3px; color: rgba(255,255,255,0.65); position: relative; z-index: 1; }
+    .past-label-text { font-size: 0.6rem; color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 1; margin-top: 4px; }
 
-    .footer-text { font-size: 0.7rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; margin-top: 16px; }
+    .footer-text { font-size: 0.68rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; }
 
+    /* 반응형 */
+    @media (max-width: 900px) {
+      .current-section { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+      .side-panel { border-left: none; border-top: 1px solid rgba(255,255,255,0.07); max-height: 45vh; }
+      .main-title { font-size: 4rem; }
+      .year-card { width: 140px; height: 140px; }
+      .year-num { font-size: 3rem; }
+    }
     @media (max-width: 600px) {
-      .year-card { width: 160px; height: 160px; border-radius: 20px; }
-      .year-number { font-size: 3.5rem; }
-      .past-card { width: 120px; height: 120px; }
-      .past-year-num { font-size: 2.2rem; }
+      .past-section { padding: 80px 24px 60px; }
     }
   </style>
 </head>
 <body>
-  <div class="grid-overlay"></div>
+
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <div class="topbar-logos">
+      {info.schoolLogoUrl
+        ? <img src={info.schoolLogoUrl} alt="학교 로고" class="topbar-logo" />
+        : <span class="topbar-logo-fallback">한국영상대학교</span>
+      }
+      {(info.schoolLogoUrl && info.deptLogoUrl) && <div class="topbar-divider"></div>}
+      {info.deptLogoUrl
+        ? <img src={info.deptLogoUrl} alt="학과 로고" class="topbar-logo" />
+        : <span class="topbar-logo-fallback" style="opacity:0.5">게임애니메이션과</span>
+      }
+    </div>
+
+    <div class="topbar-links">
+      {info.schoolUrl && (
+        <a href={info.schoolUrl} target="_blank" rel="noopener" class="topbar-link" title="학교 홈페이지">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </a>
+      )}
+      {info.youtubeUrl && (
+        <a href={info.youtubeUrl} target="_blank" rel="noopener" class="topbar-link" title="유튜브">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+      )}
+      {info.instagramUrl && (
+        <a href={info.instagramUrl} target="_blank" rel="noopener" class="topbar-link" title="인스타그램">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+        </a>
+      )}
+    </div>
+  </header>
 
   <!-- 현재 전시 섹션 -->
-  <section class="section bg-current">
-    <div class="section-inner">
-      <div class="header">
-        <span class="label">KUMA · Game & Animation</span>
-        <h1>졸업 전시회</h1>
-        <p class="sub">연도를 선택해 전시관에 입장하세요</p>
+  <section class="current-section">
+
+    <!-- 좌측 메인 비주얼 -->
+    <div class="main-visual">
+      {info.bgImage && <div class="main-bg" style={`background-image:url('${info.bgImage}')`}></div>}
+      <div class="main-bg-gradient"></div>
+      <div class="main-grid"></div>
+
+      <div class="main-content">
+        <span class="main-label">KUMA · Game & Animation</span>
+        <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
+        <p class="main-year">{currentYears.map(y => y.label).join(' · ')}</p>
+
+        <div class="year-cards">
+          {currentYears.map(year => (
+            <a href={`/${year.id}/`} class="year-card">
+              {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+              <span class="year-badge">NOW</span>
+              <span class="year-num">{year.label}</span>
+              <span class="year-desc">전시 보러가기</span>
+              <span class="year-arrow">→</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- 우측 패널 -->
+    <div class="side-panel">
+      <!-- 전시 개요 -->
+      <div class="exhibit-info">
+        <span class="info-tag">Exhibition Info</span>
+        <h2 class="exhibit-title">{info.exhibitionTitle || '졸업 전시회'}</h2>
+
+        {info.exhibitionDate && (
+          <div class="info-row">
+            <span class="info-icon">📅</span>
+            <span class="info-text">{info.exhibitionDate}</span>
+          </div>
+        )}
+        {info.exhibitionPlace && (
+          <div class="info-row">
+            <span class="info-icon">📍</span>
+            <span class="info-text">{info.exhibitionPlace}</span>
+          </div>
+        )}
+        {info.exhibitionDesc && (
+          <p class="exhibit-desc">{info.exhibitionDesc}</p>
+        )}
       </div>
 
-      <div class="current-cards">
-        {currentYears.map(year => (
-          <a href={`/${year.id}/`} class="year-card">
-            {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-            <span class="year-badge">NOW</span>
-            <span class="year-number">{year.label}</span>
-            <span class="year-desc">전시 보러가기</span>
-            <span class="year-arrow">→</span>
-          </a>
-        ))}
+      <!-- 지도 -->
+      <div class="map-section">
+        {info.mapUrl
+          ? <iframe src={info.mapUrl} allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          : (
+            <div class="map-placeholder">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              <span>지도 embed URL을 시트에 입력해주세요</span>
+            </div>
+          )
+        }
+        <div class="map-overlay">
+          {info.mapLinkUrl && (
+            <a href={info.mapLinkUrl} target="_blank" rel="noopener" class="map-link">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+              지도에서 보기
+            </a>
+          )}
+        </div>
       </div>
-
-      <p class="footer-text">한국영상대학교 게임애니메이션과</p>
     </div>
 
     {pastYears.length > 0 && (
       <div class="scroll-hint">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
           <path d="M8 3v10M3 9l5 5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <span>과거 전시</span>
@@ -157,27 +328,32 @@ const pastYears = years.filter(y => y.active && !y.current);
 
   <!-- 과거 전시 섹션 -->
   {pastYears.length > 0 && (
-    <section class="section bg-past">
-      <div class="section-inner">
-        <div class="past-header">
-          <span class="past-label">Archive</span>
-          <p class="past-title">과거 전시</p>
-          <div class="past-divider"></div>
-        </div>
-
-        <div class="past-cards">
-          {pastYears.map(year => (
-            <a href={`/${year.id}/`} class="past-card">
-              {year.thumbnail && <div class="past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-              <span class="past-year-num">{year.label}</span>
-              <span class="past-year-label">보러가기</span>
-            </a>
-          ))}
-        </div>
-
-        <p class="footer-text">한국영상대학교 게임애니메이션과</p>
+    <section class="past-section">
+      <div class="past-header">
+        <span class="past-tag">Archive</span>
+        <p class="past-heading">과거 전시</p>
+        <div class="past-line"></div>
       </div>
+
+      <div class="past-cards">
+        {pastYears.map(year => (
+          <a href={`/${year.id}/`} class="past-card">
+            {year.thumbnail && <div class="past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+            <span class="past-num">{year.label}</span>
+            <span class="past-label-text">보러가기</span>
+          </a>
+        ))}
+      </div>
+
+      <p class="footer-text">한국영상대학교 게임애니메이션과</p>
     </section>
   )}
+
+  {pastYears.length === 0 && (
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);font-size:0.68rem;color:rgba(255,255,255,0.1);letter-spacing:3px;text-transform:uppercase;">
+      한국영상대학교 게임애니메이션과
+    </div>
+  )}
+
 </body>
 </html>

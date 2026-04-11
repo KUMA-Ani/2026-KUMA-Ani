@@ -26,18 +26,34 @@ export interface Track {
   projects: Project[];
 }
 
+export interface SiteInfo {
+  schoolLogoUrl: string;
+  deptLogoUrl: string;
+  schoolUrl: string;
+  youtubeUrl: string;
+  instagramUrl: string;
+  exhibitionTitle: string;
+  exhibitionDate: string;
+  exhibitionPlace: string;
+  exhibitionDesc: string;
+  mapUrl: string;         // 구글 지도 embed URL
+  mapLinkUrl: string;     // 지도 클릭 시 이동할 URL
+  bgImage: string;        // 메인 좌측 배경
+}
+
 export interface Year {
   id: string;
   label: string;
   thumbnail: string;
   active: boolean;
-  current: boolean; // 현재 전시 여부
+  current: boolean;
   trackCount: number;
   tracks: Track[];
 }
 
 export interface SiteData {
   years: Year[];
+  info: SiteInfo;
 }
 
 function sheetCsvUrl(spreadsheetId: string, gid: string): string {
@@ -48,21 +64,15 @@ function parseCsv(csv: string): string[][] {
   const lines = csv.trim().split('\n');
   return lines.map(line => {
     const cells: string[] = [];
-    let current = '';
-    let inQuotes = false;
+    let cur = '';
+    let inQ = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
-      if (ch === '"') {
-        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-        else { inQuotes = !inQuotes; }
-      } else if (ch === ',' && !inQuotes) {
-        cells.push(current.trim());
-        current = '';
-      } else {
-        current += ch;
-      }
+      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else { inQ = !inQ; } }
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
     }
-    cells.push(current.trim());
+    cells.push(cur.trim());
     return cells;
   });
 }
@@ -71,7 +81,7 @@ function rowsToObjects(rows: string[][]): Record<string, string>[] {
   if (rows.length < 2) return [];
   const headers = rows[0].map(h => h.trim());
   return rows.slice(1)
-    .filter(row => row.some(cell => cell !== ''))
+    .filter(row => row.some(c => c !== ''))
     .map(row => {
       const obj: Record<string, string> = {};
       headers.forEach((h, i) => { obj[h] = (row[i] ?? '').trim(); });
@@ -82,8 +92,8 @@ function rowsToObjects(rows: string[][]): Record<string, string>[] {
 function parseMembers(raw: string): Member[] {
   if (!raw) return [];
   return raw.split(',').map(s => {
-    const parts = s.trim().split(':');
-    return { role: (parts[0] ?? '').trim(), name: (parts[1] ?? '').trim() };
+    const p = s.trim().split(':');
+    return { role: (p[0] ?? '').trim(), name: (p[1] ?? '').trim() };
   }).filter(m => m.name);
 }
 
@@ -92,35 +102,32 @@ function parseScreenshots(raw: string): string[] {
   return raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
 }
 
+function getDefaultInfo(): SiteInfo {
+  return {
+    schoolLogoUrl: '',
+    deptLogoUrl: '',
+    schoolUrl: '',
+    youtubeUrl: '',
+    instagramUrl: '',
+    exhibitionTitle: '졸업 전시회',
+    exhibitionDate: '',
+    exhibitionPlace: '',
+    exhibitionDesc: '',
+    mapUrl: '',
+    mapLinkUrl: '',
+    bgImage: '',
+  };
+}
+
 function getFallback(): SiteData {
   return {
+    info: getDefaultInfo(),
     years: [
       {
-        id: '2026',
-        label: '2026',
-        active: true,
-        current: true,
-        thumbnail: '',
-        trackCount: 2,
+        id: '2026', label: '2026', active: true, current: true, thumbnail: '', trackCount: 2,
         tracks: [
-          {
-            id: 'Games',
-            title: '게임 트랙',
-            category: 'Game Track',
-            description: '2026 게임 애니메이션과 졸업 전시회',
-            bgImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80',
-            bgColor: 'rgba(0,123,255,0.35)',
-            projects: []
-          },
-          {
-            id: 'Animations',
-            title: '애니메이션 트랙',
-            category: 'Animation Track',
-            description: '2026 게임 애니메이션과 졸업 전시회',
-            bgImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80',
-            bgColor: 'rgba(220,53,69,0.35)',
-            projects: []
-          }
+          { id: 'Games', title: '게임 트랙', category: 'Game Track', description: '졸업 전시회 게임 트랙', bgImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80', bgColor: 'rgba(0,123,255,0.35)', projects: [] },
+          { id: 'Animations', title: '애니메이션 트랙', category: 'Animation Track', description: '졸업 전시회 애니메이션 트랙', bgImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80', bgColor: 'rgba(220,53,69,0.35)', projects: [] }
         ]
       }
     ]
@@ -133,15 +140,17 @@ export async function fetchSiteData(): Promise<SiteData> {
   const TRACKS_GID     = import.meta.env.SHEET_GID_TRACKS   ?? '1';
   const PROJECTS_GID   = import.meta.env.SHEET_GID_PROJECTS ?? '2';
   const INFO_GID       = import.meta.env.SHEET_GID_INFO     ?? '3';
+  const SITEINFO_GID   = import.meta.env.SHEET_GID_SITEINFO ?? '4';
 
   if (!SPREADSHEET_ID) return getFallback();
 
   try {
-    const [yearsRaw, tracksRaw, projectsRaw, infoRaw] = await Promise.all([
+    const [yearsRaw, tracksRaw, projectsRaw, infoRaw, siteInfoRaw] = await Promise.all([
       fetch(sheetCsvUrl(SPREADSHEET_ID, YEARS_GID)).then(r => r.text()),
       fetch(sheetCsvUrl(SPREADSHEET_ID, TRACKS_GID)).then(r => r.text()),
       fetch(sheetCsvUrl(SPREADSHEET_ID, PROJECTS_GID)).then(r => r.text()),
       fetch(sheetCsvUrl(SPREADSHEET_ID, INFO_GID)).then(r => r.text()),
+      fetch(sheetCsvUrl(SPREADSHEET_ID, SITEINFO_GID)).then(r => r.text()),
     ]);
 
     const cleanRows = (rows: Record<string, string>[]) =>
@@ -151,6 +160,30 @@ export async function fetchSiteData(): Promise<SiteData> {
     const tracksRows   = cleanRows(rowsToObjects(parseCsv(tracksRaw)));
     const projectsRows = cleanRows(rowsToObjects(parseCsv(projectsRaw)));
     const infoRows     = cleanRows(rowsToObjects(parseCsv(infoRaw)));
+    const siteInfoRows = rowsToObjects(parseCsv(siteInfoRaw));
+
+    // SiteInfo: 키-값 형태 (A열=항목명, B열=값)
+    const siMap: Record<string, string> = {};
+    siteInfoRows.forEach(row => {
+      const key = Object.values(row)[0] ?? '';
+      const val = Object.values(row)[1] ?? '';
+      if (key) siMap[key] = val;
+    });
+
+    const info: SiteInfo = {
+      schoolLogoUrl:    siMap['학교로고URL'] ?? '',
+      deptLogoUrl:      siMap['학과로고URL'] ?? '',
+      schoolUrl:        siMap['학교홈페이지URL'] ?? '',
+      youtubeUrl:       siMap['유튜브URL'] ?? '',
+      instagramUrl:     siMap['인스타URL'] ?? '',
+      exhibitionTitle:  siMap['전시제목'] ?? '졸업 전시회',
+      exhibitionDate:   siMap['전시기간'] ?? '',
+      exhibitionPlace:  siMap['전시장소'] ?? '',
+      exhibitionDesc:   siMap['전시개요'] ?? '',
+      mapUrl:           siMap['지도embedURL'] ?? '',
+      mapLinkUrl:       siMap['지도링크URL'] ?? '',
+      bgImage:          siMap['메인배경이미지'] ?? '',
+    };
 
     const infoMap: Record<string, Record<string, string>> = {};
     infoRows.forEach(row => { if (row['작품ID']) infoMap[row['작품ID']] = row; });
@@ -159,18 +192,14 @@ export async function fetchSiteData(): Promise<SiteData> {
     projectsRows.forEach(row => {
       if (!row['작품ID'] || !row['연도ID'] || !row['트랙ID']) return;
       const key = `${row['연도ID']}__${row['트랙ID']}`;
-      const info = infoMap[row['작품ID']] ?? {};
+      const inf = infoMap[row['작품ID']] ?? {};
       const project: Project = {
-        id:          row['작품ID'],
-        type:        row['타입'] === 'team' ? 'team' : 'individual',
-        title:       row['작품명'] ?? '',
-        team:        row['팀명/작가명'] ?? '',
-        thumbnail:   row['썸네일 URL'] ?? '',
-        youtubeId:   info['유튜브ID'] ?? '',
-        description: info['작품개요'] ?? '',
-        downloadUrl: info['다운로드URL'] ?? '',
-        members:     parseMembers(info['제작진'] ?? ''),
-        screenshots: parseScreenshots(info['이미지목록'] ?? ''),
+        id: row['작품ID'], type: row['타입'] === 'team' ? 'team' : 'individual',
+        title: row['작품명'] ?? '', team: row['팀명/작가명'] ?? '',
+        thumbnail: row['썸네일 URL'] ?? '', youtubeId: inf['유튜브ID'] ?? '',
+        description: inf['작품개요'] ?? '', downloadUrl: inf['다운로드URL'] ?? '',
+        members: parseMembers(inf['제작진'] ?? ''),
+        screenshots: parseScreenshots(inf['이미지목록'] ?? ''),
       };
       if (!projectMap[key]) projectMap[key] = [];
       projectMap[key].push(project);
@@ -181,36 +210,26 @@ export async function fetchSiteData(): Promise<SiteData> {
       if (!row['연도ID'] || !row['트랙ID']) return;
       const yid = row['연도ID'];
       const track: Track = {
-        id:          row['트랙ID'],
-        title:       row['트랙명'] ?? '',
-        category:    row['카테고리 태그'] ?? '',
-        description: row['설명'] ?? '',
-        bgImage:     row['배경이미지 URL'] ?? '',
-        bgColor:     row['오버레이 색상'] || 'rgba(0,0,0,0.5)',
-        projects:    projectMap[`${yid}__${row['트랙ID']}`] ?? [],
+        id: row['트랙ID'], title: row['트랙명'] ?? '', category: row['카테고리 태그'] ?? '',
+        description: row['설명'] ?? '', bgImage: row['배경이미지 URL'] ?? '',
+        bgColor: row['오버레이 색상'] || 'rgba(0,0,0,0.5)',
+        projects: projectMap[`${yid}__${row['트랙ID']}`] ?? [],
       };
       if (!trackMap[yid]) trackMap[yid] = [];
       trackMap[yid].push(track);
     });
 
-    const years: Year[] = yearsRows
-      .filter(row => row['연도ID'])
-      .map(row => {
-        const activeVal = row['활성 (Y/N)'] ?? 'Y';
-        const currentVal = row['현재전시 (Y/N)'] ?? 'N';
-        return {
-          id:         row['연도ID'],
-          label:      row['라벨'] ?? row['연도ID'],
-          thumbnail:  row['배경이미지 URL'] ?? '',
-          active:     activeVal !== 'N' && activeVal !== 'FALSE',
-          current:    currentVal === 'Y' || currentVal === 'TRUE',
-          trackCount: parseInt(row['트랙수'] ?? '1') || 1,
-          tracks:     trackMap[row['연도ID']] ?? [],
-        };
-      });
+    const years: Year[] = yearsRows.filter(row => row['연도ID']).map(row => ({
+      id: row['연도ID'], label: row['라벨'] ?? row['연도ID'],
+      thumbnail: row['배경이미지 URL'] ?? '',
+      active: (row['활성 (Y/N)'] ?? 'Y') !== 'N',
+      current: (row['현재전시 (Y/N)'] ?? 'N') === 'Y',
+      trackCount: parseInt(row['트랙수'] ?? '1') || 1,
+      tracks: trackMap[row['연도ID']] ?? [],
+    }));
 
     if (years.length === 0) return getFallback();
-    return { years };
+    return { years, info };
 
   } catch (err) {
     console.error('[KUMA] 구글 시트 fetch 실패:', err);

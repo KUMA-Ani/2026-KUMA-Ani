@@ -48,7 +48,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: calc(100vh - 52px) 1fr;
+      grid-template-columns: calc((100vh - 52px) * 1.15) 1fr;
       padding-top: 52px;
       position: relative;
     }
@@ -163,47 +163,55 @@ const pastYears = years.filter(y => y.active && !y.current);
       background: #080808;
       display: flex; flex-direction: column;
       overflow: hidden;
+      position: relative;
     }
 
     /* 전시 개요 */
     .exhibit-info {
       flex: 1;
-      padding: 36px 32px;
+      padding: 32px 28px 20px;
       display: flex; flex-direction: column; justify-content: center;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
       overflow-y: auto;
     }
-    .info-tag { font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 20px; display: block; font-weight: 600; }
-    .exhibit-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 20px; line-height: 1.3; letter-spacing: -0.5px; }
-    .info-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
-    .info-icon { font-size: 0.85rem; margin-top: 1px; flex-shrink: 0; opacity: 0.6; }
-    .info-text { font-size: 0.85rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; }
-    .exhibit-desc { font-size: 0.83rem; color: rgba(255,255,255,0.5); line-height: 1.8; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
+    .info-tag { font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; display: block; font-weight: 600; }
+    .exhibit-title { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.3; letter-spacing: -0.5px; }
+    .info-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .info-icon { font-size: 0.82rem; margin-top: 1px; flex-shrink: 0; opacity: 0.6; }
+    .info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; }
+    .exhibit-desc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
 
-    /* 지도 */
+    /* 지도 — 정사각형, 우측 하단 */
     .map-section {
-      height: 360px;
       position: relative;
       background: #080808;
       flex-shrink: 0;
       padding: 0 20px 20px 20px;
+      /* 우측 패널 너비에 맞춰 정사각형 */
+      aspect-ratio: 1 / 1;
+      align-self: flex-end;
+      width: 100%;
     }
-    .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.85); overflow: hidden; }
+    .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.85); }
     .map-placeholder {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; color: rgba(255,255,255,0.2); font-size: 0.8rem;
+      gap: 8px; color: rgba(255,255,255,0.2); font-size: 0.8rem; border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,0.08);
     }
     .map-placeholder svg { opacity: 0.3; }
     .map-overlay {
       position: absolute; inset: 0;
-      display: flex; align-items: flex-end; padding: 14px 16px;
-      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+      display: flex; align-items: flex-end;
+      padding: 0 20px 34px 20px;
+      pointer-events: none;
     }
     .map-link {
-      font-size: 0.72rem; color: rgba(255,255,255,0.6); text-decoration: none;
+      font-size: 0.7rem; color: rgba(255,255,255,0.55); text-decoration: none;
       letter-spacing: 2px; text-transform: uppercase; font-weight: 500;
       display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+      pointer-events: all;
+      background: rgba(0,0,0,0.4); padding: 6px 12px; border-radius: 20px;
+      backdrop-filter: blur(4px);
     }
     .map-link:hover { color: #fff; }
 
@@ -274,19 +282,86 @@ const pastYears = years.filter(y => y.active && !y.current);
 
     .footer-text { font-size: 0.68rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; }
 
-    /* 반응형 */
-    @media (max-width: 900px) {
-      .current-section { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-      .side-panel { border-left: none; border-top: 1px solid rgba(255,255,255,0.07); max-height: 45vh; }
-      .year-card { width: 200px; height: 200px; padding: 20px; }
-      .card-title { font-size: 1.1rem; }
-      .year-num { font-size: 2.8rem; }
+    /* ── 모바일 반응형 ── */
+    @media (max-width: 768px) {
+      html { scroll-snap-type: y mandatory; }
+
+      /* 상단 바 */
+      .topbar { padding: 0 16px; height: 48px; }
+      .topbar-logo-fallback { font-size: 0.68rem; }
+      .topbar-link { width: 30px; height: 30px; }
+      .topbar-link svg { width: 13px; height: 13px; }
+
+      /* 현재 전시 — 세로 스택 */
+      .current-section {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        min-height: 100svh;
+        padding-top: 48px;
+      }
+
+      /* 메인 비주얼 — 정사각형 */
+      .main-visual { height: 100vw; padding: 24px; }
+      .main-label { font-size: 0.62rem; letter-spacing: 5px; margin-bottom: 10px; }
+      .main-badge { font-size: 0.5rem; padding: 3px 8px; margin-bottom: 10px; }
+      .main-title { font-size: clamp(1.5rem, 5.5vw, 2.5rem); letter-spacing: -1px; }
+      .main-year { font-size: 0.8rem; margin-top: 6px; }
+      .main-bottom { right: 24px; }
+      .main-enter-arrow { font-size: 2.5rem; }
+
+      /* 우측 패널 — 세로 배치 */
+      .side-panel {
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.07);
+        flex-direction: row;
+        height: auto;
+      }
+
+      /* 모바일: 개요는 좌측, 지도는 우측 */
+      .exhibit-info {
+        flex: 1;
+        padding: 24px 20px;
+        border-bottom: none;
+        border-right: 1px solid rgba(255,255,255,0.07);
+        justify-content: flex-start;
+      }
+      .info-tag { margin-bottom: 10px; }
+      .exhibit-title { font-size: 1rem; margin-bottom: 12px; }
+      .info-row { margin-bottom: 8px; }
+      .info-text { font-size: 0.78rem; }
+      .exhibit-desc { display: none; } /* 모바일에서 개요 텍스트 숨김 */
+
+      /* 모바일: 지도 우측에 정사각형 */
+      .map-section {
+        width: 44vw;
+        aspect-ratio: 1 / 1;
+        flex-shrink: 0;
+        align-self: stretch;
+        padding: 12px;
+      }
+      .map-link { font-size: 0.6rem; padding: 4px 8px; }
+
+      /* 스크롤 힌트 */
+      .scroll-hint { bottom: 16px; font-size: 0.6rem; }
+
+      /* 과거 전시 */
+      .past-section { padding: 60px 20px 48px; gap: 28px; height: auto; min-height: 100svh; }
+      .past-heading { font-size: 1.6rem; }
+      .past-cards { gap: 16px; padding-bottom: 8px; }
+      .past-card { width: 72vw; height: 72vw; border-radius: 20px; padding: 22px; }
+      .past-num { font-size: 3.8rem; letter-spacing: -4px; }
+      .past-go-text { font-size: 0.65rem; }
+      .past-go-arrow { font-size: 1.6rem; }
     }
-    @media (max-width: 600px) {
-      .past-section { padding: 80px 24px 60px; }
-      .year-card { width: 160px; height: 160px; padding: 16px; border-radius: 20px; }
-      .card-title { font-size: 0.9rem; }
-      .year-num { font-size: 2.2rem; }
+
+    @media (max-width: 420px) {
+      .main-visual { padding: 20px; }
+      .main-title { font-size: 1.4rem; }
+      .side-panel { flex-direction: column; }
+      .exhibit-info { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .map-section { width: 100%; aspect-ratio: 16 / 9; }
+      .past-card { width: 80vw; height: 80vw; }
     }
   </style>
 </head>

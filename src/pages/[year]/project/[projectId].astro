@@ -1,0 +1,123 @@
+---
+import { fetchSiteData } from '../../../lib/fetchSheetData';
+
+export async function getStaticPaths() {
+  const { fetchSiteData } = await import('../../../lib/fetchSheetData');
+  const { years } = await fetchSiteData();
+  const paths: any[] = [];
+  years.forEach(y =>
+    y.tracks.forEach(t =>
+      t.projects.forEach(p =>
+        paths.push({
+          params: { year: y.id, projectId: p.id },
+          props: { project: p, trackId: t.id, trackTitle: t.title, trackCount: y.trackCount ?? y.tracks.length }
+        })
+      )
+    )
+  );
+  return paths;
+}
+
+const { year } = Astro.params;
+const { project, trackId, trackTitle, trackCount } = Astro.props;
+const showTrackNav = trackCount > 1;
+---
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{project?.title} - KUMA {year}</title>
+  <style>
+    body { background: #000; color: #eee; font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
+    .container { max-width: 1360px; margin: 0 auto; padding: 40px 40px 100px; }
+    .back { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 1.3rem; display: inline-block; margin-bottom: 24px; transition: color 0.2s; }
+    .back:hover { color: #fff; }
+    .breadcrumb { font-size: 0.75rem; color: #444; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .breadcrumb span { color: #2a2a2a; margin: 0 8px; }
+    h1 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 900; margin: 0 0 6px; letter-spacing: -0.5px; }
+    .subtitle { color: #555; font-size: 0.9rem; margin-bottom: 40px; }
+    .layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 28px; margin-bottom: 60px; align-items: start; }
+    .video-wrap iframe { width: 100%; aspect-ratio: 16/9; border-radius: 14px; border: 1px solid #181818; display: block; }
+    .no-video { aspect-ratio: 16/9; background: #0d0d0d; border-radius: 14px; border: 1px solid #181818; display: flex; align-items: center; justify-content: center; color: #2a2a2a; font-size: 0.9rem; }
+    .download-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 18px; background: #007bff; color: #fff; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: background 0.2s, transform 0.2s; }
+    .download-btn:hover { background: #0069d9; transform: translateY(-2px); }
+    .info-col { display: flex; flex-direction: column; gap: 16px; }
+    .card { background: #0d0d0d; border: 1px solid #181818; border-radius: 18px; padding: 28px; }
+    .card-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 3px; color: #444; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .card-label::before { content: ''; display: inline-block; width: 3px; height: 0.9rem; background: #007bff; border-radius: 2px; }
+    .description { line-height: 1.85; color: #aaa; font-size: 0.95rem; word-break: keep-all; white-space: pre-line; }
+    .members-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
+    .member { background: #131313; border: 1px solid #1e1e1e; border-radius: 10px; padding: 12px 8px; text-align: center; }
+    .member-role { font-size: 0.68rem; color: #555; display: block; margin-bottom: 4px; }
+    .member-name { font-size: 0.9rem; font-weight: 700; color: #ddd; display: block; }
+    .gallery { border-top: 1px solid #111; padding-top: 48px; }
+    .gallery-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 3px; color: #444; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .gallery-label::before { content: ''; display: inline-block; width: 3px; height: 0.9rem; background: #007bff; border-radius: 2px; }
+    .screenshots { display: flex; flex-direction: column; gap: 20px; }
+    .screenshots img { width: 100%; border-radius: 12px; border: 1px solid #111; display: block; }
+    @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .container { padding: 28px 18px 80px; } h1 { font-size: 1.8rem; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href={`/${year}/track/${trackId}/`} class="back">← {trackTitle}</a>
+
+    <p class="breadcrumb">
+      {year}
+      <span>/</span>
+      {trackTitle}
+      <span>/</span>
+      {project?.type === 'team' ? 'Team' : 'Individual'}
+    </p>
+    <h1>{project?.title}</h1>
+    <p class="subtitle">{project?.team}</p>
+
+    <div class="layout">
+      <div class="video-wrap">
+        {project?.youtubeId
+          ? <iframe src={`https://www.youtube.com/embed/${project.youtubeId}`} frameborder="0" allowfullscreen></iframe>
+          : <div class="no-video">영상 없음</div>
+        }
+        {project?.downloadUrl && (
+          <a href={project.downloadUrl} class="download-btn" target="_blank" rel="noopener">
+            🎮 게임 다운로드
+          </a>
+        )}
+      </div>
+
+      <div class="info-col">
+        <div class="card">
+          <p class="card-label">작품 개요</p>
+          <p class="description">{project?.description || '설명이 없습니다.'}</p>
+        </div>
+
+        {project?.members && project.members.length > 0 && (
+          <div class="card">
+            <p class="card-label">제작진</p>
+            <div class="members-grid">
+              {project.members.map((m: any) => (
+                <div class="member">
+                  <span class="member-role">{m.role}</span>
+                  <span class="member-name">{m.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {project?.screenshots && project.screenshots.length > 0 && (
+      <div class="gallery">
+        <p class="gallery-label">스크린샷</p>
+        <div class="screenshots">
+          {project.screenshots.map((src: string, i: number) => (
+            <img src={src} alt={`Screenshot ${i + 1}`} loading="lazy" />
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</body>
+</html>

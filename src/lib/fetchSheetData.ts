@@ -1,7 +1,4 @@
-// ============================================================
 // 구글 시트에서 데이터를 fetch해서 사이트 데이터 구조로 변환
-// 빌드 타임에 실행됨 (Astro SSG)
-// ============================================================
 
 export interface Member {
   role: string;
@@ -44,13 +41,10 @@ export interface SiteData {
   years: Year[];
 }
 
-// 구글 시트 CSV export URL 생성
-// 시트 ID와 각 탭의 GID로 CSV를 직접 fetch
 function sheetCsvUrl(spreadsheetId: string, gid: string): string {
   return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
 }
 
-// CSV 파싱 (따옴표 포함 처리)
 function parseCsv(csv: string): string[][] {
   const lines = csv.trim().split('\n');
   return lines.map(line => {
@@ -74,12 +68,11 @@ function parseCsv(csv: string): string[][] {
   });
 }
 
-// rows[0]을 헤더로, 나머지를 객체 배열로 변환
 function rowsToObjects(rows: string[][]): Record<string, string>[] {
   if (rows.length < 2) return [];
   const headers = rows[0].map(h => h.trim());
   return rows.slice(1)
-    .filter(row => row.some(cell => cell !== '')) // 빈 행 제거
+    .filter(row => row.some(cell => cell !== ''))
     .map(row => {
       const obj: Record<string, string> = {};
       headers.forEach((h, i) => { obj[h] = (row[i] ?? '').trim(); });
@@ -87,7 +80,6 @@ function rowsToObjects(rows: string[][]): Record<string, string>[] {
     });
 }
 
-// 제작진 파싱: "역할:이름, 역할:이름" 형식
 function parseMembers(raw: string): Member[] {
   if (!raw) return [];
   return raw.split(',').map(s => {
@@ -96,28 +88,58 @@ function parseMembers(raw: string): Member[] {
   }).filter(m => m.name);
 }
 
-// 이미지 목록 파싱: 줄바꿈 또는 쉼표로 구분
 function parseScreenshots(raw: string): string[] {
   if (!raw) return [];
   return raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
 }
 
-// 메인 fetch 함수
+// fallback 데이터 (시트 연결 전 기본값)
+function getFallback(): SiteData {
+  return {
+    years: [
+      {
+        id: '2026',
+        label: '2026',
+        active: true,
+        thumbnail: '',
+        trackCount: 2,
+        tracks: [
+          {
+            id: 'Games',
+            title: '게임 트랙',
+            category: 'Game Track',
+            description: '2026 게임 애니메이션과 졸업 전시회',
+            bgImage: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920&q=80',
+            bgColor: 'rgba(0,123,255,0.35)',
+            projects: []
+          },
+          {
+            id: 'Animations',
+            title: '애니메이션 트랙',
+            category: 'Animation Track',
+            description: '2026 게임 애니메이션과 졸업 전시회',
+            bgImage: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80',
+            bgColor: 'rgba(220,53,69,0.35)',
+            projects: []
+          }
+        ]
+      }
+    ]
+  };
+}
+
 export async function fetchSiteData(): Promise<SiteData> {
   const SPREADSHEET_ID = import.meta.env.GOOGLE_SHEET_ID;
-  const YEARS_GID      = import.meta.env.SHEET_GID_YEARS      ?? '0';
-  const TRACKS_GID     = import.meta.env.SHEET_GID_TRACKS     ?? '1';
-  const PROJECTS_GID   = import.meta.env.SHEET_GID_PROJECTS   ?? '2';
-  const INFO_GID       = import.meta.env.SHEET_GID_INFO       ?? '3';
+  const YEARS_GID      = import.meta.env.SHEET_GID_YEARS    ?? '0';
+  const TRACKS_GID     = import.meta.env.SHEET_GID_TRACKS   ?? '1';
+  const PROJECTS_GID   = import.meta.env.SHEET_GID_PROJECTS ?? '2';
+  const INFO_GID       = import.meta.env.SHEET_GID_INFO     ?? '3';
 
   if (!SPREADSHEET_ID) {
-    console.warn('[KUMA] GOOGLE_SHEET_ID 환경변수가 없습니다. 로컬 fallback 데이터를 사용합니다.');
-    const fallback = await import('../data/site.json');
-    return fallback as unknown as SiteData;
+    return getFallback();
   }
 
   try {
-    // 4개 시트 동시 fetch
     const [yearsRaw, tracksRaw, projectsRaw, infoRaw] = await Promise.all([
       fetch(sheetCsvUrl(SPREADSHEET_ID, YEARS_GID)).then(r => r.text()),
       fetch(sheetCsvUrl(SPREADSHEET_ID, TRACKS_GID)).then(r => r.text()),
@@ -130,21 +152,29 @@ export async function fetchSiteData(): Promise<SiteData> {
     const projectsRows = rowsToObjects(parseCsv(projectsRaw));
     const infoRows     = rowsToObjects(parseCsv(infoRaw));
 
-    // ProjectInfo를 작품ID로 인덱싱
-    const infoMap: Record<string, Record<string, string>> = {};
-    infoRows.forEach(row => { if (row['작품ID']) infoMap[row['작품ID']] = row; });
+    // 안내 행(첫 번째 데이터 행) 제거 - 대괄호로 시작하는 행은 안내문
+    const cleanRows = (rows: Record<string, string>[]) =>
+      rows.filter(row => !Object.values(row).some(v => v.startsWith('[')));
 
-    // Projects를 연도+트랙ID로 그루핑
+    const cleanYears    = cleanRows(yearsRows);
+    const cleanTracks   = cleanRows(tracksRows);
+    const cleanProjects = cleanRows(projectsRows);
+    const cleanInfo     = cleanRows(infoRows);
+
+    const infoMap: Record<string, Record<string, string>> = {};
+    cleanInfo.forEach(row => { if (row['작품ID']) infoMap[row['작품ID']] = row; });
+
     const projectMap: Record<string, Project[]> = {};
-    projectsRows.forEach(row => {
+    cleanProjects.forEach(row => {
+      if (!row['작품ID'] || !row['연도ID'] || !row['트랙ID']) return;
       const key = `${row['연도ID']}__${row['트랙ID']}`;
       const info = infoMap[row['작품ID']] ?? {};
       const project: Project = {
         id:          row['작품ID'],
-        type:        (row['타입'] === 'team' ? 'team' : 'individual'),
-        title:       row['작품명'],
-        team:        row['팀명'],
-        thumbnail:   row['썸네일'],
+        type:        row['타입'] === 'team' ? 'team' : 'individual',
+        title:       row['작품명'] ?? '',
+        team:        row['팀명/작가명'] ?? '',
+        thumbnail:   row['썸네일 URL'] ?? '',
         youtubeId:   info['유튜브ID'] ?? '',
         description: info['작품개요'] ?? '',
         downloadUrl: info['다운로드URL'] ?? '',
@@ -155,38 +185,39 @@ export async function fetchSiteData(): Promise<SiteData> {
       projectMap[key].push(project);
     });
 
-    // Tracks를 연도ID로 그루핑
     const trackMap: Record<string, Track[]> = {};
-    tracksRows.forEach(row => {
+    cleanTracks.forEach(row => {
+      if (!row['연도ID'] || !row['트랙ID']) return;
       const yid = row['연도ID'];
       const track: Track = {
         id:          row['트랙ID'],
-        title:       row['트랙명'],
-        category:    row['카테고리'],
-        description: row['설명'],
-        bgImage:     row['배경이미지'],
-        bgColor:     row['오버레이색상'] || 'rgba(0,0,0,0.5)',
+        title:       row['트랙명'] ?? '',
+        category:    row['카테고리 태그'] ?? '',
+        description: row['설명'] ?? '',
+        bgImage:     row['배경이미지 URL'] ?? '',
+        bgColor:     row['오버레이 색상'] || 'rgba(0,0,0,0.5)',
         projects:    projectMap[`${yid}__${row['트랙ID']}`] ?? [],
       };
       if (!trackMap[yid]) trackMap[yid] = [];
       trackMap[yid].push(track);
     });
 
-    // Years 조립
-    const years: Year[] = yearsRows.map(row => ({
-      id:         row['연도ID'],
-      label:      row['라벨'],
-      thumbnail:  row['배경이미지'],
-      active:     row['활성'] !== 'N' && row['활성'] !== 'FALSE' && row['활성'] !== '0',
-      trackCount: parseInt(row['트랙수'] ?? '1'),
-      tracks:     trackMap[row['연도ID']] ?? [],
-    }));
+    const years: Year[] = cleanYears
+      .filter(row => row['연도ID'])
+      .map(row => ({
+        id:         row['연도ID'],
+        label:      row['라벨'] ?? row['연도ID'],
+        thumbnail:  row['배경이미지 URL'] ?? '',
+        active:     row['활성 (Y/N)'] !== 'N' && row['활성 (Y/N)'] !== 'FALSE',
+        trackCount: parseInt(row['트랙수'] ?? '1') || 1,
+        tracks:     trackMap[row['연도ID']] ?? [],
+      }));
 
+    if (years.length === 0) return getFallback();
     return { years };
 
   } catch (err) {
-    console.error('[KUMA] 구글 시트 fetch 실패, fallback 사용:', err);
-    const fallback = await import('../data/site.json');
-    return fallback as unknown as SiteData;
+    console.error('[KUMA] 구글 시트 fetch 실패:', err);
+    return getFallback();
   }
 }

@@ -55,64 +55,75 @@ const pastYears = years.filter(y => y.active && !y.current);
 
     /* 좌측 메인 비주얼 */
     .main-visual {
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      background: #000;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column;
+      align-items: flex-start; justify-content: flex-end;
+      padding: 52px; background: #000;
     }
+    .main-visual-link {
+      text-decoration: none; color: #fff; cursor: pointer;
+    }
+    .main-hover-overlay {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.4s; z-index: 1; pointer-events: none;
+    }
+    .main-visual-link:hover .main-hover-overlay { background: rgba(255,255,255,0.04); }
     .main-bg {
       position: absolute; inset: 0;
       background-size: cover; background-position: center;
-      opacity: 0.35;
+      opacity: 0.38;
+      transition: transform 0.7s cubic-bezier(0.25,1,0.5,1), opacity 0.4s;
     }
+    .main-visual-link:hover .main-bg { opacity: 0.52; transform: scale(1.03); }
     .main-bg-gradient {
       position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(0,50,180,0.6) 0%, rgba(100,0,60,0.4) 100%);
+      background: linear-gradient(135deg, rgba(0,40,160,0.65) 0%, rgba(100,0,60,0.45) 100%);
     }
     .main-grid {
       position: absolute; inset: 0;
       background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 50px 50px;
     }
-
-    .main-content { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; }
-    .main-label { font-size: 0.72rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 28px; display: block; text-align: center; }
-
-    /* 연도 카드 — 정사각형, 제목+연도 포함 */
-    .year-cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
-    .year-card {
-      width: clamp(260px, 30vw, 380px);
-      height: clamp(260px, 30vw, 380px);
-      border-radius: 28px;
-      text-decoration: none; color: #fff; overflow: hidden;
-      display: flex; flex-direction: column; justify-content: space-between;
-      position: relative;
-      padding: 28px;
-      border: 1px solid rgba(255,255,255,0.12);
+    .main-content { position: relative; z-index: 2; width: 100%; }
+    .main-label { font-size: 0.7rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 14px; display: block; }
+    .main-badge { display: inline-block; font-size: 0.58rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 16px; }
+    .main-title { font-size: clamp(2.6rem, 4.5vw, 5rem); font-weight: 900; letter-spacing: -3px; line-height: 1.0; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+    .main-year { font-size: clamp(0.9rem, 1.3vw, 1.2rem); color: rgba(255,255,255,0.32); letter-spacing: 4px; font-weight: 300; margin-bottom: 28px; }
+    .main-enter {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-size: 0.82rem; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,0.5); font-weight: 500;
+      padding: 11px 22px; border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 40px; backdrop-filter: blur(6px);
       background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s, background 0.3s, border-color 0.3s;
-      cursor: pointer;
+      transition: color 0.3s, border-color 0.3s, background 0.3s, transform 0.3s;
     }
-    .year-card::after {
-      content: '';
-      position: absolute; inset: 0; border-radius: 28px;
-      border: 2px solid transparent;
-      background: linear-gradient(135deg, rgba(100,180,255,0.4), rgba(200,100,255,0.2)) border-box;
-      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: destination-out;
-      mask-composite: exclude;
-      opacity: 0;
-      transition: opacity 0.3s;
+    .main-visual-link:hover .main-enter {
+      color: #fff; border-color: rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.1); transform: translateX(6px);
+    }
+
+    /* 연도 여러개일 때 카드 */
+    .year-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .year-card {
+      width: clamp(220px, 25vw, 320px); height: clamp(220px, 25vw, 320px);
+      border-radius: 24px; text-decoration: none; color: #fff; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; padding: 24px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s, background 0.3s;
     }
     .year-card:hover { transform: translateY(-8px) scale(1.02); background: rgba(255,255,255,0.09); box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(100,180,255,0.2); }
-    .year-card:hover::after { opacity: 1; }
-    .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.18; transition: opacity 0.4s; }
-    .year-card:hover .year-card-bg { opacity: 0.28; }
+    .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.18; }
+    .year-badge { display: inline-block; font-size: 0.55rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 10px; }
+    .card-top { position: relative; z-index: 1; }
+    .card-title { font-size: clamp(1.1rem, 2vw, 1.6rem); font-weight: 800; line-height: 1.25; letter-spacing: -0.5px; color: #fff; }
+    .card-bottom { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; }
+    .year-num { font-size: clamp(2.5rem, 4vw, 4rem); font-weight: 900; letter-spacing: -3px; line-height: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,220,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .card-enter { font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.35); padding-bottom: 4px; transition: color 0.3s, transform 0.3s; }
+    .year-card:hover .card-enter { color: rgba(255,255,255,0.7); transform: translateX(4px); }
 
     /* 카드 상단 — 제목 */
     .card-top { position: relative; z-index: 1; }
@@ -282,32 +293,53 @@ const pastYears = years.filter(y => y.active && !y.current);
   <!-- 현재 전시 섹션 -->
   <section class="current-section">
 
-    <!-- 좌측 메인 비주얼 -->
-    <div class="main-visual">
-      {info.bgImage && <div class="main-bg" style={`background-image:url('${info.bgImage}')`}></div>}
-      <div class="main-bg-gradient"></div>
-      <div class="main-grid"></div>
+    <!-- 좌측 메인 비주얼 — 전체가 버튼 (연도 1개 기준) -->
+    {currentYears.length === 1 ? (
+      <a href={`/${currentYears[0].id}/`} class="main-visual main-visual-link">
+        {info.bgImage
+          ? <div class="main-bg" style={`background-image:url('${info.bgImage}')`}></div>
+          : currentYears[0].thumbnail
+            ? <div class="main-bg" style={`background-image:url('${currentYears[0].thumbnail}')`}></div>
+            : null
+        }
+        <div class="main-bg-gradient"></div>
+        <div class="main-grid"></div>
+        <div class="main-hover-overlay"></div>
 
-      <div class="main-content">
-        <span class="main-label">KUMA · Game & Animation</span>
+        <div class="main-content">
+          <span class="main-label">KUMA · Game & Animation</span>
+          <span class="main-badge">NOW</span>
+          <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
+          <p class="main-year">{currentYears[0].label}</p>
+          <span class="main-enter">전시 입장하기 →</span>
+        </div>
+      </a>
+    ) : (
+      <div class="main-visual">
+        {info.bgImage && <div class="main-bg" style={`background-image:url('${info.bgImage}')`}></div>}
+        <div class="main-bg-gradient"></div>
+        <div class="main-grid"></div>
 
-        <div class="year-cards">
-          {currentYears.map(year => (
-            <a href={`/${year.id}/`} class="year-card">
-              {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-              <div class="card-top">
-                <span class="year-badge">NOW</span>
-                <p class="card-title">{info.exhibitionTitle || '졸업 전시회'}</p>
-              </div>
-              <div class="card-bottom">
-                <span class="year-num">{year.label}</span>
-                <span class="card-enter">입장하기 →</span>
-              </div>
-            </a>
-          ))}
+        <div class="main-content">
+          <span class="main-label">KUMA · Game & Animation</span>
+          <div class="year-cards">
+            {currentYears.map(year => (
+              <a href={`/${year.id}/`} class="year-card">
+                {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+                <div class="card-top">
+                  <span class="year-badge">NOW</span>
+                  <p class="card-title">{info.exhibitionTitle || '졸업 전시회'}</p>
+                </div>
+                <div class="card-bottom">
+                  <span class="year-num">{year.label}</span>
+                  <span class="card-enter">입장하기 →</span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    )}
 
     <!-- 우측 패널 -->
     <div class="side-panel">

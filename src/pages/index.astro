@@ -48,7 +48,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: 1fr 420px;
+      grid-template-columns: 1fr 380px;
       padding-top: 52px;
       position: relative;
     }
@@ -57,8 +57,9 @@ const pastYears = years.filter(y => y.active && !y.current);
     .main-visual {
       position: relative; overflow: hidden;
       display: flex; flex-direction: column;
-      align-items: flex-start; justify-content: flex-end;
-      padding: 52px; background: #000;
+      align-items: flex-start; justify-content: flex-start;
+      padding: 48px;
+      background: #000;
     }
     .main-visual-link {
       text-decoration: none; color: #fff; cursor: pointer;
@@ -86,8 +87,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       background-size: 50px 50px;
     }
     .main-content {
-      position: relative; z-index: 2; width: 100%; height: 100%;
-      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; z-index: 2; width: 100%;
     }
     .main-top { display: flex; flex-direction: column; }
     .main-label { font-size: 0.7rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 14px; display: block; }
@@ -95,20 +95,22 @@ const pastYears = years.filter(y => y.active && !y.current);
     .main-title { font-size: clamp(2.2rem, 4vw, 4.5rem); font-weight: 900; letter-spacing: -2px; line-height: 1.05; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .main-year { font-size: clamp(0.85rem, 1.2vw, 1.1rem); color: rgba(255,255,255,0.3); letter-spacing: 4px; font-weight: 300; margin-top: 10px; }
 
-    /* 입장하기 — 우측 중앙, 셀 없이 텍스트+화살표 */
-    .main-bottom { display: flex; justify-content: flex-end; align-items: center; }
+    /* 입장하기 — 우측 중앙, 화살표만 */
+    .main-bottom {
+      display: flex; justify-content: flex-end; align-items: center;
+      position: absolute; right: 52px; top: 50%; transform: translateY(-50%);
+    }
     .main-enter {
-      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
-      text-decoration: none; color: rgba(255,255,255,0.75);
+      display: flex; align-items: center;
+      color: rgba(255,255,255,0.6);
       transition: color 0.3s, transform 0.3s;
     }
-    .main-enter-text { font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; font-weight: 600; }
     .main-enter-arrow {
-      font-size: 2.8rem; line-height: 1; font-weight: 200;
+      font-size: 4rem; line-height: 1; font-weight: 200;
       transition: transform 0.3s;
     }
     .main-visual-link:hover .main-enter { color: #fff; }
-    .main-visual-link:hover .main-enter-arrow { transform: translateX(8px); }
+    .main-visual-link:hover .main-enter-arrow { transform: translateX(10px); }
 
     /* 연도 여러개일 때 카드 */
     .year-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
@@ -180,7 +182,7 @@ const pastYears = years.filter(y => y.active && !y.current);
 
     /* 지도 */
     .map-section {
-      height: 240px;
+      height: 360px;
       position: relative;
       background: #111;
       flex-shrink: 0;
@@ -345,11 +347,10 @@ const pastYears = years.filter(y => y.active && !y.current);
             <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
             <p class="main-year">{currentYears[0].label}</p>
           </div>
-          <div class="main-bottom">
-            <div class="main-enter">
-              <span class="main-enter-text">전시 입장하기</span>
-              <span class="main-enter-arrow">→</span>
-            </div>
+        </div>
+        <div class="main-bottom">
+          <div class="main-enter">
+            <span class="main-enter-arrow">→</span>
           </div>
         </div>
       </a>

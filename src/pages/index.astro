@@ -79,30 +79,64 @@ const pastYears = years.filter(y => y.active && !y.current);
       background-size: 50px 50px;
     }
 
-    .main-content { position: relative; z-index: 2; text-align: center; width: 100%; }
-    .main-label { font-size: 0.72rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 16px; display: block; }
-    .main-title { font-size: clamp(3.5rem, 7vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 0.95; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
-    .main-year { font-size: clamp(1rem, 2vw, 1.4rem); color: rgba(255,255,255,0.35); letter-spacing: 4px; margin-bottom: 48px; font-weight: 300; }
+    .main-content { position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .main-label { font-size: 0.72rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 28px; display: block; text-align: center; }
 
-    /* 연도 카드들 */
-    .year-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    /* 연도 카드 — 정사각형, 제목+연도 포함 */
+    .year-cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
     .year-card {
-      width: 180px; height: 180px; border-radius: 24px;
+      width: clamp(260px, 30vw, 380px);
+      height: clamp(260px, 30vw, 380px);
+      border-radius: 28px;
       text-decoration: none; color: #fff; overflow: hidden;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      display: flex; flex-direction: column; justify-content: space-between;
       position: relative;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(8px);
-      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s, background 0.3s;
+      padding: 28px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s, background 0.3s, border-color 0.3s;
+      cursor: pointer;
     }
-    .year-card:hover { transform: translateY(-10px) scale(1.04); background: rgba(255,255,255,0.1); box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
-    .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
-    .year-badge { position: absolute; top: 12px; right: 12px; font-size: 0.55rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); z-index: 1; }
-    .year-num { font-size: 4rem; font-weight: 900; letter-spacing: -4px; position: relative; z-index: 1; line-height: 1; }
-    .year-desc { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 6px; position: relative; z-index: 1; letter-spacing: 1px; }
-    .year-arrow { position: absolute; bottom: 14px; font-size: 0.9rem; opacity: 0; transform: translateY(4px); transition: 0.3s; z-index: 1; }
-    .year-card:hover .year-arrow { opacity: 1; transform: translateY(0); }
+    .year-card::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: 28px;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, rgba(100,180,255,0.4), rgba(200,100,255,0.2)) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .year-card:hover { transform: translateY(-8px) scale(1.02); background: rgba(255,255,255,0.09); box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(100,180,255,0.2); }
+    .year-card:hover::after { opacity: 1; }
+    .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.18; transition: opacity 0.4s; }
+    .year-card:hover .year-card-bg { opacity: 0.28; }
+
+    /* 카드 상단 — 제목 */
+    .card-top { position: relative; z-index: 1; }
+    .year-badge { display: inline-block; font-size: 0.55rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 12px; }
+    .card-title {
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+      font-weight: 800; line-height: 1.25; letter-spacing: -0.5px;
+      color: #fff; text-align: left;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+
+    /* 카드 하단 — 연도 + 화살표 */
+    .card-bottom { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; }
+    .year-num {
+      font-size: clamp(3rem, 5vw, 5rem); font-weight: 900; letter-spacing: -4px; line-height: 1;
+      background: linear-gradient(135deg, #fff 0%, rgba(180,220,255,0.7) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .card-enter {
+      font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,0.35); display: flex; align-items: center; gap: 6px;
+      padding-bottom: 6px; transition: color 0.3s, transform 0.3s;
+    }
+    .year-card:hover .card-enter { color: rgba(255,255,255,0.7); transform: translateX(4px); }
 
     /* 우측 패널 */
     .side-panel {
@@ -198,12 +232,15 @@ const pastYears = years.filter(y => y.active && !y.current);
     @media (max-width: 900px) {
       .current-section { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
       .side-panel { border-left: none; border-top: 1px solid rgba(255,255,255,0.07); max-height: 45vh; }
-      .main-title { font-size: 4rem; }
-      .year-card { width: 140px; height: 140px; }
-      .year-num { font-size: 3rem; }
+      .year-card { width: 200px; height: 200px; padding: 20px; }
+      .card-title { font-size: 1.1rem; }
+      .year-num { font-size: 2.8rem; }
     }
     @media (max-width: 600px) {
       .past-section { padding: 80px 24px 60px; }
+      .year-card { width: 160px; height: 160px; padding: 16px; border-radius: 20px; }
+      .card-title { font-size: 0.9rem; }
+      .year-num { font-size: 2.2rem; }
     }
   </style>
 </head>
@@ -253,17 +290,19 @@ const pastYears = years.filter(y => y.active && !y.current);
 
       <div class="main-content">
         <span class="main-label">KUMA · Game & Animation</span>
-        <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
-        <p class="main-year">{currentYears.map(y => y.label).join(' · ')}</p>
 
         <div class="year-cards">
           {currentYears.map(year => (
             <a href={`/${year.id}/`} class="year-card">
               {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-              <span class="year-badge">NOW</span>
-              <span class="year-num">{year.label}</span>
-              <span class="year-desc">전시 보러가기</span>
-              <span class="year-arrow">→</span>
+              <div class="card-top">
+                <span class="year-badge">NOW</span>
+                <p class="card-title">{info.exhibitionTitle || '졸업 전시회'}</p>
+              </div>
+              <div class="card-bottom">
+                <span class="year-num">{year.label}</span>
+                <span class="card-enter">입장하기 →</span>
+              </div>
             </a>
           ))}
         </div>

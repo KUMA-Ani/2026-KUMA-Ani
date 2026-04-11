@@ -1,5 +1,3 @@
-// 구글 시트에서 데이터를 fetch해서 사이트 데이터 구조로 변환
-
 export interface Member {
   role: string;
   name: string;
@@ -33,6 +31,7 @@ export interface Year {
   label: string;
   thumbnail: string;
   active: boolean;
+  current: boolean; // 현재 전시 여부
   trackCount: number;
   tracks: Track[];
 }
@@ -93,7 +92,6 @@ function parseScreenshots(raw: string): string[] {
   return raw.split(/[\n,]/).map(s => s.trim()).filter(Boolean);
 }
 
-// fallback 데이터 (시트 연결 전 기본값)
 function getFallback(): SiteData {
   return {
     years: [
@@ -101,6 +99,7 @@ function getFallback(): SiteData {
         id: '2026',
         label: '2026',
         active: true,
+        current: true,
         thumbnail: '',
         trackCount: 2,
         tracks: [
@@ -135,9 +134,7 @@ export async function fetchSiteData(): Promise<SiteData> {
   const PROJECTS_GID   = import.meta.env.SHEET_GID_PROJECTS ?? '2';
   const INFO_GID       = import.meta.env.SHEET_GID_INFO     ?? '3';
 
-  if (!SPREADSHEET_ID) {
-    return getFallback();
-  }
+  if (!SPREADSHEET_ID) return getFallback();
 
   try {
     const [yearsRaw, tracksRaw, projectsRaw, infoRaw] = await Promise.all([
@@ -147,25 +144,19 @@ export async function fetchSiteData(): Promise<SiteData> {
       fetch(sheetCsvUrl(SPREADSHEET_ID, INFO_GID)).then(r => r.text()),
     ]);
 
-    const yearsRows    = rowsToObjects(parseCsv(yearsRaw));
-    const tracksRows   = rowsToObjects(parseCsv(tracksRaw));
-    const projectsRows = rowsToObjects(parseCsv(projectsRaw));
-    const infoRows     = rowsToObjects(parseCsv(infoRaw));
-
-    // 안내 행(첫 번째 데이터 행) 제거 - 대괄호로 시작하는 행은 안내문
     const cleanRows = (rows: Record<string, string>[]) =>
       rows.filter(row => !Object.values(row).some(v => v.startsWith('[')));
 
-    const cleanYears    = cleanRows(yearsRows);
-    const cleanTracks   = cleanRows(tracksRows);
-    const cleanProjects = cleanRows(projectsRows);
-    const cleanInfo     = cleanRows(infoRows);
+    const yearsRows    = cleanRows(rowsToObjects(parseCsv(yearsRaw)));
+    const tracksRows   = cleanRows(rowsToObjects(parseCsv(tracksRaw)));
+    const projectsRows = cleanRows(rowsToObjects(parseCsv(projectsRaw)));
+    const infoRows     = cleanRows(rowsToObjects(parseCsv(infoRaw)));
 
     const infoMap: Record<string, Record<string, string>> = {};
-    cleanInfo.forEach(row => { if (row['작품ID']) infoMap[row['작품ID']] = row; });
+    infoRows.forEach(row => { if (row['작품ID']) infoMap[row['작품ID']] = row; });
 
     const projectMap: Record<string, Project[]> = {};
-    cleanProjects.forEach(row => {
+    projectsRows.forEach(row => {
       if (!row['작품ID'] || !row['연도ID'] || !row['트랙ID']) return;
       const key = `${row['연도ID']}__${row['트랙ID']}`;
       const info = infoMap[row['작품ID']] ?? {};
@@ -186,7 +177,7 @@ export async function fetchSiteData(): Promise<SiteData> {
     });
 
     const trackMap: Record<string, Track[]> = {};
-    cleanTracks.forEach(row => {
+    tracksRows.forEach(row => {
       if (!row['연도ID'] || !row['트랙ID']) return;
       const yid = row['연도ID'];
       const track: Track = {
@@ -202,16 +193,21 @@ export async function fetchSiteData(): Promise<SiteData> {
       trackMap[yid].push(track);
     });
 
-    const years: Year[] = cleanYears
+    const years: Year[] = yearsRows
       .filter(row => row['연도ID'])
-      .map(row => ({
-        id:         row['연도ID'],
-        label:      row['라벨'] ?? row['연도ID'],
-        thumbnail:  row['배경이미지 URL'] ?? '',
-        active:     row['활성 (Y/N)'] !== 'N' && row['활성 (Y/N)'] !== 'FALSE',
-        trackCount: parseInt(row['트랙수'] ?? '1') || 1,
-        tracks:     trackMap[row['연도ID']] ?? [],
-      }));
+      .map(row => {
+        const activeVal = row['활성 (Y/N)'] ?? 'Y';
+        const currentVal = row['현재전시 (Y/N)'] ?? 'N';
+        return {
+          id:         row['연도ID'],
+          label:      row['라벨'] ?? row['연도ID'],
+          thumbnail:  row['배경이미지 URL'] ?? '',
+          active:     activeVal !== 'N' && activeVal !== 'FALSE',
+          current:    currentVal === 'Y' || currentVal === 'TRUE',
+          trackCount: parseInt(row['트랙수'] ?? '1') || 1,
+          tracks:     trackMap[row['연도ID']] ?? [],
+        };
+      });
 
     if (years.length === 0) return getFallback();
     return { years };

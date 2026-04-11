@@ -1,6 +1,8 @@
 ---
 import { fetchSiteData } from '../lib/fetchSheetData';
 const { years } = await fetchSiteData();
+const currentYears = years.filter(y => y.active && y.current);
+const pastYears = years.filter(y => y.active && !y.current);
 ---
 <html lang="ko">
 <head>
@@ -9,60 +11,173 @@ const { years } = await fetchSiteData();
   <title>KUMA 졸업 전시회</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; overflow: hidden; }
-    .bg { position: fixed; inset: 0; background: radial-gradient(ellipse at 20% 50%, rgba(0,80,200,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(180,30,60,0.10) 0%, transparent 60%), #000; z-index: 0; }
-    .grid-overlay { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 60px 60px; }
-    .page { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100vh; gap: 60px; }
+    html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
+    body { background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; height: 100%; }
+
+    /* 섹션 공통 */
+    .section {
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 60px 20px;
+    }
+
+    /* 배경 */
+    .bg-current {
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(0,80,200,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(180,30,60,0.10) 0%, transparent 60%),
+        #000;
+    }
+    .bg-past { background: #060606; }
+
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .section-inner { position: relative; z-index: 1; width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 48px; }
+
+    /* 헤더 */
     .header { text-align: center; }
-    .label { font-size: 0.8rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 16px; display: block; }
-    h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; letter-spacing: -2px; line-height: 1; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .sub { font-size: 1rem; color: rgba(255,255,255,0.3); margin-top: 12px; }
-    .years-container { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center; padding: 0 20px; }
-    .year-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 220px; height: 280px; border-radius: 24px; text-decoration: none; color: white; overflow: hidden; transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s ease; border: 1px solid rgba(255,255,255,0.15); background: linear-gradient(145deg, #111 0%, #0a0a0a 100%); box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 60px rgba(0,0,0,0.5); }
+    .label { font-size: 0.75rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 14px; display: block; }
+    h1 { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; letter-spacing: -3px; line-height: 1; background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sub { font-size: 1rem; color: rgba(255,255,255,0.3); margin-top: 10px; }
+
+    /* 현재 전시 카드 - 정사각형 */
+    .current-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+    .year-card {
+      position: relative;
+      width: 240px; height: 240px;
+      border-radius: 28px;
+      text-decoration: none; color: #fff;
+      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.25,1,0.5,1), box-shadow 0.4s;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 24px 48px rgba(0,0,0,0.6);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
     .year-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,100,255,0.15) 0%, rgba(180,30,60,0.1) 100%); }
     .year-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
-    .year-card:not(.inactive):hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 0 0 1px rgba(100,160,255,0.2), 0 40px 80px rgba(0,80,200,0.25); }
-    .year-card.inactive { opacity: 0.35; pointer-events: none; }
-    .year-badge { position: absolute; top: 18px; right: 18px; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; z-index: 1; }
-    .year-badge.open { color: rgba(100,200,255,0.9); background: rgba(0,100,255,0.12); border: 1px solid rgba(0,100,255,0.25); }
-    .year-badge.closed { color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
-    .year-number { font-size: 4.5rem; font-weight: 900; letter-spacing: -4px; line-height: 1; position: relative; z-index: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .year-desc { font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-top: 8px; position: relative; z-index: 1; }
-    .year-arrow { position: absolute; bottom: 22px; font-size: 1.2rem; opacity: 0; transform: translateY(4px); transition: opacity 0.3s, transform 0.3s; z-index: 1; }
-    .year-card:not(.inactive):hover .year-arrow { opacity: 1; transform: translateY(0); }
-    .footer-text { font-size: 0.75rem; color: rgba(255,255,255,0.12); letter-spacing: 3px; text-transform: uppercase; }
+    .year-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 0 0 1px rgba(100,160,255,0.25), 0 40px 80px rgba(0,80,200,0.3); }
+    .year-badge { position: absolute; top: 16px; right: 16px; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; z-index: 1; color: rgba(100,200,255,0.9); background: rgba(0,100,255,0.12); border: 1px solid rgba(0,100,255,0.25); }
+    .year-number { font-size: 5rem; font-weight: 900; letter-spacing: -5px; line-height: 1; position: relative; z-index: 1; background: linear-gradient(135deg, #fff 0%, rgba(180,210,255,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .year-desc { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 6px; position: relative; z-index: 1; letter-spacing: 1px; }
+    .year-arrow { position: absolute; bottom: 18px; font-size: 1rem; opacity: 0; transform: translateY(4px); transition: 0.3s; z-index: 1; }
+    .year-card:hover .year-arrow { opacity: 1; transform: translateY(0); }
+
+    /* 스크롤 힌트 */
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: rgba(255,255,255,0.2); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;
+      animation: bounce 2s infinite;
+    }
+    .scroll-hint svg { opacity: 0.4; }
+    @keyframes bounce { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
+
+    /* 과거 전시 섹션 */
+    .past-header { text-align: center; width: 100%; }
+    .past-label { font-size: 0.7rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.25); display: block; margin-bottom: 10px; }
+    .past-title { font-size: 1.4rem; font-weight: 700; color: rgba(255,255,255,0.5); }
+    .past-divider { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 16px auto 0; }
+
+    /* 과거 카드 - 더 작고 가로형 */
+    .past-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .past-card {
+      position: relative;
+      width: 160px; height: 160px;
+      border-radius: 20px;
+      text-decoration: none; color: #fff;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s, opacity 0.3s;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: #0d0d0d;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0.65;
+    }
+    .past-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); opacity: 1; }
+    .past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.12; }
+    .past-year-num { font-size: 3rem; font-weight: 900; letter-spacing: -3px; position: relative; z-index: 1; color: rgba(255,255,255,0.7); }
+    .past-year-label { font-size: 0.65rem; color: rgba(255,255,255,0.3); margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 1; }
+
+    .footer-text { font-size: 0.7rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; margin-top: 16px; }
+
     @media (max-width: 600px) {
-      body, html { overflow-y: auto; }
-      .page { height: auto; min-height: 100vh; padding: 60px 20px; }
-      .year-card { width: 160px; height: 220px; }
-      .year-number { font-size: 3.2rem; }
+      .year-card { width: 160px; height: 160px; border-radius: 20px; }
+      .year-number { font-size: 3.5rem; }
+      .past-card { width: 120px; height: 120px; }
+      .past-year-num { font-size: 2.2rem; }
     }
   </style>
 </head>
 <body>
-  <div class="bg"></div>
   <div class="grid-overlay"></div>
-  <div class="page">
-    <div class="header">
-      <span class="label">KUMA · Game & Animation</span>
-      <h1>졸업 전시회</h1>
-      <p class="sub">연도를 선택해 전시관에 입장하세요</p>
+
+  <!-- 현재 전시 섹션 -->
+  <section class="section bg-current">
+    <div class="section-inner">
+      <div class="header">
+        <span class="label">KUMA · Game & Animation</span>
+        <h1>졸업 전시회</h1>
+        <p class="sub">연도를 선택해 전시관에 입장하세요</p>
+      </div>
+
+      <div class="current-cards">
+        {currentYears.map(year => (
+          <a href={`/${year.id}/`} class="year-card">
+            {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+            <span class="year-badge">NOW</span>
+            <span class="year-number">{year.label}</span>
+            <span class="year-desc">전시 보러가기</span>
+            <span class="year-arrow">→</span>
+          </a>
+        ))}
+      </div>
+
+      <p class="footer-text">한국영상대학교 게임애니메이션과</p>
     </div>
-    <div class="years-container">
-      {years.map(year => (
-        <a
-          href={year.active ? `/${year.id}/` : undefined}
-          class={`year-card${year.active ? '' : ' inactive'}`}
-        >
-          {year.thumbnail && <div class="year-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-          <span class={`year-badge ${year.active ? 'open' : 'closed'}`}>{year.active ? 'OPEN' : '준비중'}</span>
-          <span class="year-number">{year.label}</span>
-          <span class="year-desc">{year.active ? '전시 보러가기' : 'Coming Soon'}</span>
-          <span class="year-arrow">→</span>
-        </a>
-      ))}
-    </div>
-    <p class="footer-text">국민대학교 게임애니메이션과</p>
-  </div>
+
+    {pastYears.length > 0 && (
+      <div class="scroll-hint">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 9l5 5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>과거 전시</span>
+      </div>
+    )}
+  </section>
+
+  <!-- 과거 전시 섹션 -->
+  {pastYears.length > 0 && (
+    <section class="section bg-past">
+      <div class="section-inner">
+        <div class="past-header">
+          <span class="past-label">Archive</span>
+          <p class="past-title">과거 전시</p>
+          <div class="past-divider"></div>
+        </div>
+
+        <div class="past-cards">
+          {pastYears.map(year => (
+            <a href={`/${year.id}/`} class="past-card">
+              {year.thumbnail && <div class="past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+              <span class="past-year-num">{year.label}</span>
+              <span class="past-year-label">보러가기</span>
+            </a>
+          ))}
+        </div>
+
+        <p class="footer-text">한국영상대학교 게임애니메이션과</p>
+      </div>
+    </section>
+  )}
 </body>
 </html>

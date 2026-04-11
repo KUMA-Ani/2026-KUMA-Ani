@@ -5,11 +5,7 @@ export async function getStaticPaths() {
   const { fetchSiteData } = await import('../../../lib/fetchSheetData');
   const { years } = await fetchSiteData();
   const paths: any[] = [];
-  years.forEach(y =>
-    y.tracks.forEach(t =>
-      paths.push({ params: { year: y.id, trackId: t.id } })
-    )
-  );
+  years.forEach(y => y.tracks.forEach(t => paths.push({ params: { year: y.id, trackId: t.id } })));
   return paths;
 }
 
@@ -27,29 +23,54 @@ const showTrackNav = (yearData?.trackCount ?? 1) > 1;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{track?.title ?? trackId} - KUMA {year}</title>
   <style>
-    body { background: #080808; color: #eee; font-family: 'Pretendard', sans-serif; margin: 0; padding: 48px 48px 80px; }
-    .back { color: rgba(255,255,255,0.35); text-decoration: none; font-size: 1.3rem; display: inline-block; margin-bottom: 28px; transition: color 0.2s; }
-    .back:hover { color: #fff; }
-    .page-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin: 0 0 6px; letter-spacing: -1px; }
-    .page-sub { color: #444; font-size: 0.85rem; margin-bottom: 56px; letter-spacing: 2px; text-transform: uppercase; }
-    .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 4px; color: #444; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #111; }
-    .section + .section { margin-top: 56px; }
+    body { background: #080808; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding: 56px 52px 100px; }
+
+    .back {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 2rem;
+      display: inline-block;
+      margin-bottom: 32px;
+      transition: color 0.2s, transform 0.2s;
+      line-height: 1;
+      font-weight: 300;
+    }
+    .back:hover { color: #fff; transform: translateX(-4px); }
+
+    .page-title { font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 900; margin: 0 0 6px; letter-spacing: -1px; color: #fff; }
+    .page-sub { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 60px; letter-spacing: 3px; text-transform: uppercase; font-weight: 500; }
+
+    .section-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 5px;
+      color: rgba(255,255,255,0.5); font-weight: 600;
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .section + .section { margin-top: 60px; }
+
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-    .card { background: #101010; border: 1px solid #1a1a1a; border-radius: 14px; overflow: hidden; text-decoration: none; color: #fff; display: block; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s; }
-    .card:hover { border-color: #333; transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+
+    .card {
+      background: #111; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; overflow: hidden; text-decoration: none; color: #fff;
+      display: block; transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
     .thumb { width: 100%; aspect-ratio: 16/9; background: #1a1a1a; background-size: cover; background-position: center; }
-    .card-body { padding: 16px 18px; }
-    .card-title { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
-    .card-team { font-size: 0.8rem; color: #555; }
-    .empty { color: #333; margin-top: 40px; font-size: 0.9rem; }
-    @media (max-width: 768px) { body { padding: 32px 20px 60px; } .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; } }
+    .card-body { padding: 18px 20px; }
+    .card-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 5px; color: #fff; }
+    .card-team { font-size: 0.82rem; color: rgba(255,255,255,0.55); font-weight: 500; }
+
+    .empty { color: rgba(255,255,255,0.3); margin-top: 40px; font-size: 0.9rem; }
+
+    @media (max-width: 768px) {
+      body { padding: 36px 20px 80px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    }
   </style>
 </head>
 <body>
-  <!-- 트랙이 여러 개면 트랙 선택으로, 1개면 연도 메인으로 -->
-  <a href={showTrackNav ? `/${year}/` : '/'} class="back">
-    {showTrackNav ? '← 트랙 선택' : '← 메인'}
-  </a>
+  <a href={showTrackNav ? `/${year}/` : '/'} class="back">←</a>
 
   <h1 class="page-title">{track?.title ?? trackId}</h1>
   <p class="page-sub">{year} · {track?.category ?? ''}</p>

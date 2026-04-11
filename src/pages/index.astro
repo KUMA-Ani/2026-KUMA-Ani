@@ -85,24 +85,30 @@ const pastYears = years.filter(y => y.active && !y.current);
       background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 50px 50px;
     }
-    .main-content { position: relative; z-index: 2; width: 100%; }
+    .main-content {
+      position: relative; z-index: 2; width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .main-top { display: flex; flex-direction: column; }
     .main-label { font-size: 0.7rem; letter-spacing: 7px; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 14px; display: block; }
-    .main-badge { display: inline-block; font-size: 0.58rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 16px; }
-    .main-title { font-size: clamp(2.6rem, 4.5vw, 5rem); font-weight: 900; letter-spacing: -3px; line-height: 1.0; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
-    .main-year { font-size: clamp(0.9rem, 1.3vw, 1.2rem); color: rgba(255,255,255,0.32); letter-spacing: 4px; font-weight: 300; margin-bottom: 28px; }
+    .main-badge { display: inline-block; font-size: 0.58rem; letter-spacing: 3px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 16px; align-self: flex-start; }
+    .main-title { font-size: clamp(2.2rem, 4vw, 4.5rem); font-weight: 900; letter-spacing: -2px; line-height: 1.05; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .main-year { font-size: clamp(0.85rem, 1.2vw, 1.1rem); color: rgba(255,255,255,0.3); letter-spacing: 4px; font-weight: 300; margin-top: 10px; }
+
+    /* 입장하기 — 우측 중앙, 셀 없이 텍스트+화살표 */
+    .main-bottom { display: flex; justify-content: flex-end; align-items: center; }
     .main-enter {
-      display: inline-flex; align-items: center; gap: 10px;
-      font-size: 0.82rem; letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(255,255,255,0.5); font-weight: 500;
-      padding: 11px 22px; border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 40px; backdrop-filter: blur(6px);
-      background: rgba(255,255,255,0.05);
-      transition: color 0.3s, border-color 0.3s, background 0.3s, transform 0.3s;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+      text-decoration: none; color: rgba(255,255,255,0.75);
+      transition: color 0.3s, transform 0.3s;
     }
-    .main-visual-link:hover .main-enter {
-      color: #fff; border-color: rgba(255,255,255,0.4);
-      background: rgba(255,255,255,0.1); transform: translateX(6px);
+    .main-enter-text { font-size: 1rem; letter-spacing: 4px; text-transform: uppercase; font-weight: 600; }
+    .main-enter-arrow {
+      font-size: 2.8rem; line-height: 1; font-weight: 200;
+      transition: transform 0.3s;
     }
+    .main-visual-link:hover .main-enter { color: #fff; }
+    .main-visual-link:hover .main-enter-arrow { transform: translateX(8px); }
 
     /* 연도 여러개일 때 카드 */
     .year-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
@@ -212,30 +218,56 @@ const pastYears = years.filter(y => y.active && !y.current);
     .past-section {
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      min-height: 100vh;
-      padding: 100px 60px 80px;
+      height: 100vh;
+      padding: 80px 60px 60px;
       background: #050505;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 48px;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+      gap: 40px;
     }
-    .past-header { text-align: center; }
-    .past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 10px; }
-    .past-heading { font-size: 2rem; font-weight: 700; color: rgba(255,255,255,0.45); }
-    .past-line { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin: 16px auto 0; }
+    .past-header { text-align: left; }
+    .past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 8px; }
+    .past-heading { font-size: 2.2rem; font-weight: 700; color: rgba(255,255,255,0.5); }
+    .past-line { width: 40px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 14px; }
 
-    .past-cards { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-    .past-card {
-      width: 150px; height: 150px; border-radius: 20px;
-      text-decoration: none; color: #fff; overflow: hidden;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      position: relative; border: 1px solid rgba(255,255,255,0.07);
-      background: #0d0d0d; opacity: 0.6;
-      transition: transform 0.3s, opacity 0.3s, box-shadow 0.3s;
+    /* 가로 스크롤 */
+    .past-cards {
+      display: flex; gap: 24px;
+      overflow-x: auto; overflow-y: visible;
+      width: 100%; padding-bottom: 16px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
-    .past-card:hover { transform: translateY(-6px); opacity: 1; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    .past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.15; }
-    .past-num { font-size: 2.8rem; font-weight: 900; letter-spacing: -3px; color: rgba(255,255,255,0.65); position: relative; z-index: 1; }
-    .past-label-text { font-size: 0.6rem; color: rgba(255,255,255,0.3); letter-spacing: 2px; text-transform: uppercase; position: relative; z-index: 1; margin-top: 4px; }
+    .past-cards::-webkit-scrollbar { display: none; }
+
+    .past-card {
+      flex-shrink: 0;
+      width: 420px; height: 420px;
+      border-radius: 28px;
+      text-decoration: none; color: #fff; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; padding: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: #0d0d0d;
+      opacity: 0.65;
+      transition: transform 0.35s cubic-bezier(0.25,1,0.5,1), opacity 0.3s, box-shadow 0.35s;
+      scroll-snap-align: start;
+    }
+    .past-card:hover { transform: translateY(-8px) scale(1.01); opacity: 1; box-shadow: 0 30px 70px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.15); }
+    .past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.15; transition: opacity 0.3s; }
+    .past-card:hover .past-card-bg { opacity: 0.25; }
+
+    .past-card-top { position: relative; z-index: 1; }
+    .past-num { font-size: 5rem; font-weight: 900; letter-spacing: -5px; line-height: 1; color: rgba(255,255,255,0.8); display: block; }
+    .past-card-bottom { position: relative; z-index: 1; display: flex; justify-content: flex-end; align-items: flex-end; }
+    .past-go {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.3s, transform 0.3s;
+    }
+    .past-go-text { font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; font-weight: 500; }
+    .past-go-arrow { font-size: 2rem; line-height: 1; font-weight: 200; }
+    .past-card:hover .past-go { color: rgba(255,255,255,0.8); transform: translate(4px, -4px); }
 
     .footer-text { font-size: 0.68rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; }
 
@@ -307,11 +339,18 @@ const pastYears = years.filter(y => y.active && !y.current);
         <div class="main-hover-overlay"></div>
 
         <div class="main-content">
-          <span class="main-label">KUMA · Game & Animation</span>
-          <span class="main-badge">NOW</span>
-          <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
-          <p class="main-year">{currentYears[0].label}</p>
-          <span class="main-enter">전시 입장하기 →</span>
+          <div class="main-top">
+            <span class="main-label">KUMA · Game & Animation</span>
+            <span class="main-badge">NOW</span>
+            <h1 class="main-title">{info.exhibitionTitle || '졸업 전시회'}</h1>
+            <p class="main-year">{currentYears[0].label}</p>
+          </div>
+          <div class="main-bottom">
+            <div class="main-enter">
+              <span class="main-enter-text">전시 입장하기</span>
+              <span class="main-enter-arrow">→</span>
+            </div>
+          </div>
         </div>
       </a>
     ) : (
@@ -410,8 +449,15 @@ const pastYears = years.filter(y => y.active && !y.current);
         {pastYears.map(year => (
           <a href={`/${year.id}/`} class="past-card">
             {year.thumbnail && <div class="past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-            <span class="past-num">{year.label}</span>
-            <span class="past-label-text">보러가기</span>
+            <div class="past-card-top">
+              <span class="past-num">{year.label}</span>
+            </div>
+            <div class="past-card-bottom">
+              <div class="past-go">
+                <span class="past-go-text">보러가기</span>
+                <span class="past-go-arrow">→</span>
+              </div>
+            </div>
           </a>
         ))}
       </div>

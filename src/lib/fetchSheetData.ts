@@ -171,8 +171,8 @@ export async function fetchSiteData(): Promise<SiteData> {
     });
 
     const info: SiteInfo = {
-      schoolLogoUrl:    siMap['학교로고URL'] ?? '',
-      deptLogoUrl:      siMap['학과로고URL'] ?? '',
+      schoolLogoUrl:    siMap['학교로고 (URL, https://a.jpg,https://b.jpg]  && Github 내부 파일에 이미지를 넣는경우 /images/파일명.jpg)'] ?? siMap['학교로고URL'] ?? siMap['학교로고'] ?? '',
+      deptLogoUrl:      siMap['학과로고 (URLhttps://a.jpg,https://b.jpg]  && Github 내부 파일에 이미지를 넣는경우 /images/파일명.jpg)'] ?? siMap['학과로고URL'] ?? siMap['학과로고'] ?? '',
       schoolUrl:        siMap['학교홈페이지URL'] ?? '',
       youtubeUrl:       siMap['유튜브URL'] ?? '',
       instagramUrl:     siMap['인스타URL'] ?? '',
@@ -180,7 +180,7 @@ export async function fetchSiteData(): Promise<SiteData> {
       exhibitionDate:   siMap['전시기간'] ?? '',
       exhibitionPlace:  siMap['전시장소'] ?? '',
       exhibitionDesc:   siMap['전시개요'] ?? '',
-      mapUrl:           siMap['지도embedURL'] ?? '',
+      mapUrl:           siMap['지도embedURL (구글 지도 → 공유 → 지도 퍼가기 → <iframe src="..."> 에서 src= 안의 URL만 복사)'] ?? siMap['지도embedURL'] ?? '',
       mapLinkUrl:       siMap['지도링크URL'] ?? '',
       bgImage:          siMap['메인배경이미지'] ?? '',
     };

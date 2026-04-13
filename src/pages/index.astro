@@ -318,15 +318,15 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-arrow { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); font-size: 2.8rem; color: rgba(255,255,255,0.5); font-weight: 200; z-index: 2; transition: opacity 0.3s; }
     .m-scroll-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: rgba(255,255,255,0.25); font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; animation: bounce 2.5s infinite; z-index: 10; pointer-events: none; transition: opacity 0.3s; }
 
-    /* 전시 개요 오버레이 — 위에서 내려옴 */
+    /* 전시 개요 오버레이 — 아래서 위로 올라옴 */
     .m-info-overlay {
       position: fixed;
-      top: 48px; left: 0; right: 0;
+      bottom: 0; left: 0; right: 0;
       height: calc(100vh - 48px);
-      transform: translateY(-100%);
+      transform: translateY(100%);
       transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
       z-index: 10;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex; flex-direction: column;
@@ -778,6 +778,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       let overlayVisible = false;
       let touchStartY = 0;
       let touchMoved = false;
+      const vh = window.innerHeight - 48;
 
       function showOverlay() {
         if (overlayVisible) return;
@@ -797,15 +798,16 @@ const pastYears = years.filter(y => y.active && !y.current);
         if (visualLink) visualLink.style.pointerEvents = '';
       }
 
-      // 스크롤로 트리거
+      // 스크롤 위치에 따라 단계 제어
       window.addEventListener('scroll', () => {
-        const vh = window.innerHeight - 48;
         const scrollY = window.scrollY;
+        // 1단계: 첫 번째 spacer(vh) 30% 지나면 → 오버레이 표시
         if (scrollY > vh * 0.3 && !overlayVisible) showOverlay();
+        // 다시 맨 위 → 오버레이 닫기
         if (scrollY < vh * 0.1 && overlayVisible) hideOverlay();
       }, { passive: true });
 
-      // 핸들 클릭 → 닫기 + 위로 스크롤
+      // 핸들 탭 → 닫고 맨 위로
       if (handle) {
         handle.addEventListener('click', () => {
           hideOverlay();
@@ -826,13 +828,25 @@ const pastYears = years.filter(y => y.active && !y.current);
       document.addEventListener('touchend', (e) => {
         if (!touchMoved) return;
         const diff = touchStartY - e.changedTouches[0].clientY;
-        if (diff > 60 && !overlayVisible) {
-          showOverlay();
-          window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+
+        // 위로 스와이프
+        if (diff > 60) {
+          if (!overlayVisible) {
+            // 오버레이 표시
+            showOverlay();
+            window.scrollTo({ top: vh * 0.5, behavior: 'smooth' });
+          } else {
+            // 오버레이 있을 때 위로 더 스와이프 → 과거전시로
+            window.scrollTo({ top: vh * 2, behavior: 'smooth' });
+          }
         }
-        if (diff < -60 && overlayVisible) {
-          hideOverlay();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // 아래로 스와이프
+        if (diff < -60) {
+          if (overlayVisible) {
+            hideOverlay();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         }
       }, { passive: true });
     }

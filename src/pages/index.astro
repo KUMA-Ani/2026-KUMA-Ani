@@ -284,17 +284,20 @@ const pastYears = years.filter(y => y.active && !y.current);
     /* ── 모바일 전용 (PC에서 숨김) ── */
     .m-container { display: none; }
 
+    /* 모바일 전체 래퍼 */
     .m-container {
       position: relative;
       width: 100%;
     }
 
-    /* 메인 비주얼 — fixed처럼 고정 */
+    /* 메인 비주얼 — fixed로 배경에 고정 */
     .m-visual-section {
-      position: sticky; top: 48px;
-      width: 100%; height: calc(100vh - 48px);
+      position: fixed;
+      top: 48px; left: 0; right: 0;
+      height: calc(100vh - 48px);
       overflow: hidden;
       display: flex; flex-direction: column;
+      z-index: 1;
     }
     .m-visual-link {
       display: flex; flex-direction: column;
@@ -304,71 +307,40 @@ const pastYears = years.filter(y => y.active && !y.current);
       padding: 28px;
       position: relative; overflow: hidden;
     }
-    .m-bg {
-      position: absolute; inset: 0;
-      background-size: cover; background-position: center;
-      opacity: 0.4;
-      transition: opacity 0.5s;
-    }
-    .m-bg-gradient {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(0,40,160,0.65) 0%, rgba(100,0,60,0.45) 100%);
-      transition: opacity 0.5s;
-    }
-    .m-grid {
-      position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 44px 44px;
-    }
+    .m-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.4; }
+    .m-bg-gradient { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,40,160,0.65) 0%, rgba(100,0,60,0.45) 100%); }
+    .m-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 44px 44px; }
     .m-content { position: relative; z-index: 2; width: 100%; }
     .m-label { font-size: 0.62rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.32); margin-bottom: 10px; display: block; }
     .m-badge { display: inline-block; font-size: 0.5rem; letter-spacing: 3px; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; color: rgba(100,220,255,0.9); background: rgba(0,150,255,0.15); border: 1px solid rgba(0,150,255,0.3); margin-bottom: 10px; }
     .m-title { font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; background: linear-gradient(135deg, #fff 20%, rgba(180,210,255,0.7) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .m-year { font-size: 0.82rem; color: rgba(255,255,255,0.3); letter-spacing: 4px; font-weight: 300; margin-top: 8px; }
-    .m-arrow { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); font-size: 2.8rem; color: rgba(255,255,255,0.5); font-weight: 200; z-index: 2; transition: opacity 0.4s; }
-    .m-scroll-hint {
-      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-      color: rgba(255,255,255,0.25); font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase;
-      animation: bounce 2.5s infinite; z-index: 10; pointer-events: none;
-      transition: opacity 0.4s;
-    }
+    .m-arrow { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); font-size: 2.8rem; color: rgba(255,255,255,0.5); font-weight: 200; z-index: 2; transition: opacity 0.3s; }
+    .m-scroll-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: rgba(255,255,255,0.25); font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; animation: bounce 2.5s infinite; z-index: 10; pointer-events: none; transition: opacity 0.3s; }
 
-    /* 전시 개요 오버레이 — 위에서 내려오는 어두운 패널 */
+    /* 전시 개요 오버레이 — 위에서 내려옴 */
     .m-info-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0;
+      position: fixed;
+      top: 48px; left: 0; right: 0;
       height: calc(100vh - 48px);
-      /* 기본: 위로 숨겨짐 */
       transform: translateY(-100%);
-      transition: transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
-      z-index: 30;
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.82);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-    }
-    .m-info-overlay.visible {
-      transform: translateY(0);
-    }
-    .m-info-handle {
-      width: 40px; height: 4px; border-radius: 2px;
-      background: rgba(255,255,255,0.2);
-      margin: 14px auto 0;
-    }
-    .m-info-inner {
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 10;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       display: flex; flex-direction: column;
-      height: 100%;
       overflow: hidden;
     }
+    .m-info-overlay.visible { transform: translateY(0); }
 
-    /* 전시 개요 */
+    .m-info-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.2); margin: 14px auto 0; flex-shrink: 0; cursor: pointer; }
+
     .m-exhibit {
-      flex: 1;
-      padding: 28px 24px 16px;
+      flex: 1; padding: 20px 24px 16px;
       display: flex; flex-direction: column; justify-content: center;
       border-bottom: 1px solid rgba(255,255,255,0.07);
-      overflow-y: auto;
+      overflow-y: auto; min-height: 0;
     }
     .m-info-tag { font-size: 0.62rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 12px; display: block; font-weight: 600; }
     .m-exhibit-title { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 14px; line-height: 1.3; letter-spacing: -0.5px; }
@@ -377,37 +349,35 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; }
     .m-exhibit-desc { font-size: 0.78rem; color: rgba(255,255,255,0.4); line-height: 1.75; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
 
-    /* 지도 */
-    .m-map { flex: 1; position: relative; padding: 14px 20px 20px; }
+    .m-map { flex: 1; position: relative; padding: 14px 20px 20px; min-height: 0; }
     .m-map iframe { width: 100%; height: 100%; border: none; border-radius: 16px; display: block; filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.85); }
     .m-map-placeholder { width: 100%; height: 100%; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); font-size: 0.78rem; flex-direction: column; gap: 8px; }
     .m-map-link { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: rgba(255,255,255,0.5); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(4px); white-space: nowrap; }
 
+    /* 스크롤 가능한 빈 공간 — fixed 요소 아래 실제 높이 확보 */
+    .m-spacer-visual { height: calc(100vh - 48px); }
+    .m-spacer-info { height: calc(100vh - 48px); }
+
     /* ── 모바일 미디어 쿼리 ── */
     @media (max-width: 768px) {
-      html { scroll-snap-type: none; overflow-y: auto; }
+      html { overflow-y: auto; scroll-snap-type: none; }
+      body { overflow-x: hidden; }
 
       .topbar { padding: 0 16px; height: 48px; }
       .topbar-logo-fallback { font-size: 0.68rem; }
       .topbar-link { width: 30px; height: 30px; }
       .topbar-link svg { width: 13px; height: 13px; }
 
-      /* PC 요소 숨기기 */
       .current-section { display: none !important; }
       .scroll-hint { display: none !important; }
 
-      /* 모바일 컨테이너 표시 */
       .m-container { display: block !important; }
       .m-visual-section { display: flex !important; }
 
-      /* 과거 전시 */
       .past-section {
         padding: 60px 20px 48px;
-        gap: 28px;
-        min-height: 100vh;
-        height: auto;
-        align-items: flex-start;
-        justify-content: center;
+        gap: 28px; min-height: 100vh; height: auto;
+        align-items: flex-start; justify-content: center;
       }
       .past-heading { font-size: 1.6rem; }
       .past-cards { gap: 16px; }
@@ -572,7 +542,10 @@ const pastYears = years.filter(y => y.active && !y.current);
   <!-- 모바일 전용: 전체 컨테이너 -->
   <div class="m-container" id="m-container">
 
-    <!-- 메인 비주얼 (fixed 배경처럼) -->
+    <!-- fixed 메인 비주얼 아래 높이 확보 -->
+    <div class="m-spacer-visual"></div>
+
+    <!-- 메인 비주얼 (fixed) -->
     <section class="m-visual-section" id="m-visual">
       {currentYears.length >= 1 ? (
         <a href={`/${currentYears[0].id}/`} class="m-visual-link" id="m-visual-link">
@@ -598,41 +571,37 @@ const pastYears = years.filter(y => y.active && !y.current);
       </div>
     </section>
 
-    <!-- 전시 개요 오버레이 (위로 올라옴) -->
+    <!-- 전시 개요 오버레이 (fixed, 위에서 내려옴) -->
     <div class="m-info-overlay" id="m-info-overlay">
-      <div class="m-info-handle"></div>
-      <div class="m-info-inner">
-        <!-- 전시 개요 -->
-        <div class="m-exhibit">
-          <span class="m-info-tag">Exhibition Info</span>
-          <h2 class="m-exhibit-title">{info.exhibitionTitle || '졸업 전시회'}</h2>
-          {info.exhibitionDate && (
-            <div class="m-info-row">
-              <span class="m-info-icon">📅</span>
-              <span class="m-info-text">{info.exhibitionDate}</span>
+      <div class="m-info-handle" id="m-handle"></div>
+      <div class="m-exhibit">
+        <span class="m-info-tag">Exhibition Info</span>
+        <h2 class="m-exhibit-title">{info.exhibitionTitle || '졸업 전시회'}</h2>
+        {info.exhibitionDate && (
+          <div class="m-info-row">
+            <span class="m-info-icon">📅</span>
+            <span class="m-info-text">{info.exhibitionDate}</span>
+          </div>
+        )}
+        {info.exhibitionPlace && (
+          <div class="m-info-row">
+            <span class="m-info-icon">📍</span>
+            <span class="m-info-text">{info.exhibitionPlace}</span>
+          </div>
+        )}
+        {info.exhibitionDesc && (
+          <p class="m-exhibit-desc">{info.exhibitionDesc}</p>
+        )}
+      </div>
+      <div class="m-map">
+        {info.mapUrl
+          ? <iframe src={info.mapUrl} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          : <div class="m-map-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white" opacity="0.3"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+              <span>지도 준비 중</span>
             </div>
-          )}
-          {info.exhibitionPlace && (
-            <div class="m-info-row">
-              <span class="m-info-icon">📍</span>
-              <span class="m-info-text">{info.exhibitionPlace}</span>
-            </div>
-          )}
-          {info.exhibitionDesc && (
-            <p class="m-exhibit-desc">{info.exhibitionDesc}</p>
-          )}
-        </div>
-        <!-- 지도 -->
-        <div class="m-map">
-          {info.mapUrl
-            ? <iframe src={info.mapUrl} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            : <div class="m-map-placeholder">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="white" opacity="0.3"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                <span>지도 준비 중</span>
-              </div>
-          }
-          {info.mapLinkUrl && <a href={info.mapLinkUrl} target="_blank" class="m-map-link">지도에서 보기 →</a>}
-        </div>
+        }
+        {info.mapLinkUrl && <a href={info.mapLinkUrl} target="_blank" class="m-map-link">지도에서 보기 →</a>}
       </div>
     </div>
 
@@ -803,72 +772,68 @@ const pastYears = years.filter(y => y.active && !y.current);
       const visualLink = document.getElementById('m-visual-link');
       const scrollHint = document.getElementById('m-scroll-hint');
       const mArrow = document.querySelector('.m-arrow');
+      const handle = document.getElementById('m-handle');
       if (!overlay) return;
 
       let overlayVisible = false;
       let touchStartY = 0;
-      let isDragging = false;
+      let touchMoved = false;
 
       function showOverlay() {
-        overlay.classList.add('visible');
+        if (overlayVisible) return;
         overlayVisible = true;
+        overlay.classList.add('visible');
         if (scrollHint) scrollHint.style.opacity = '0';
         if (mArrow) mArrow.style.opacity = '0';
         if (visualLink) visualLink.style.pointerEvents = 'none';
       }
 
       function hideOverlay() {
-        overlay.classList.remove('visible');
+        if (!overlayVisible) return;
         overlayVisible = false;
+        overlay.classList.remove('visible');
         if (scrollHint) scrollHint.style.opacity = '1';
         if (mArrow) mArrow.style.opacity = '1';
         if (visualLink) visualLink.style.pointerEvents = '';
       }
 
-      const container = document.getElementById('m-container');
-      if (!container) return;
+      // 스크롤로 트리거
+      window.addEventListener('scroll', () => {
+        const vh = window.innerHeight - 48;
+        const scrollY = window.scrollY;
+        if (scrollY > vh * 0.3 && !overlayVisible) showOverlay();
+        if (scrollY < vh * 0.1 && overlayVisible) hideOverlay();
+      }, { passive: true });
 
-      // 터치 스타트
-      container.addEventListener('touchstart', (e) => {
+      // 핸들 클릭 → 닫기 + 위로 스크롤
+      if (handle) {
+        handle.addEventListener('click', () => {
+          hideOverlay();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      // 터치 스와이프
+      document.addEventListener('touchstart', (e) => {
         touchStartY = e.touches[0].clientY;
-        isDragging = false;
+        touchMoved = false;
       }, { passive: true });
 
-      container.addEventListener('touchmove', (e) => {
-        isDragging = true;
+      document.addEventListener('touchmove', () => {
+        touchMoved = true;
       }, { passive: true });
 
-      // 터치 종료 — 방향 감지
-      container.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
+      document.addEventListener('touchend', (e) => {
+        if (!touchMoved) return;
         const diff = touchStartY - e.changedTouches[0].clientY;
-
-        // 위로 스와이프 → 오버레이 표시
-        if (diff > 50 && !overlayVisible) showOverlay();
-        // 아래로 스와이프 → 오버레이 숨김
-        if (diff < -50 && overlayVisible) hideOverlay();
-      }, { passive: true });
-
-      // 오버레이 내부에서 아래 스와이프 → 숨기기
-      overlay.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-        isDragging = false;
-      }, { passive: true });
-      overlay.addEventListener('touchmove', () => { isDragging = true; }, { passive: true });
-      overlay.addEventListener('touchend', (e) => {
-        if (!isDragging) return;
-        const diff = touchStartY - e.changedTouches[0].clientY;
-        if (diff < -60) hideOverlay();
-      }, { passive: true });
-
-      // 핸들 탭하면 닫기
-      const handle = overlay.querySelector('.m-info-handle');
-      if (handle) handle.addEventListener('click', hideOverlay);
-
-      // 마우스 휠 (데스크탑 테스트용)
-      container.addEventListener('wheel', (e) => {
-        if (e.deltaY > 30 && !overlayVisible) showOverlay();
-        else if (e.deltaY < -30 && overlayVisible) hideOverlay();
+        if (diff > 60 && !overlayVisible) {
+          showOverlay();
+          window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+        }
+        if (diff < -60 && overlayVisible) {
+          hideOverlay();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }, { passive: true });
     }
 

@@ -91,9 +91,9 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
           ? <iframe src={`https://www.youtube.com/embed/${project.youtubeId}`} frameborder="0" allowfullscreen></iframe>
           : <div class="no-video">영상 없음</div>
         }
-        {project?.downloadUrl && (
+        {project?.downloadUrl && project.downloadUrl.trim() !== '' && (
           <a href={project.downloadUrl} class="download-btn" target="_blank" rel="noopener">
-            🎮 게임 다운로드
+            ⬇ 다운로드
           </a>
         )}
       </div>

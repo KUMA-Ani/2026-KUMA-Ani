@@ -462,7 +462,7 @@ const pastYears = years.filter(y => y.active && !y.current);
         </div>
         <div class="m-map">
           {info.mapUrl
-            ? <iframe src={info.mapUrl} width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            ? <iframe src={`${info.mapUrl}&iwloc=&`} width="100%" height="100%" style="border:0;pointer-events:none;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             : <div class="m-map-placeholder">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="white" opacity="0.3"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                 <span>지도 준비 중</span>
@@ -583,11 +583,10 @@ const pastYears = years.filter(y => y.active && !y.current);
       <div class="map-section">
         {info.mapUrl
           ? <iframe
-              src={info.mapUrl}
+              src={`${info.mapUrl}&iwloc=&`}
               width="100%"
               height="100%"
-              style="border:0;"
-              allowfullscreen=""
+              style="border:0;pointer-events:none;"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
             ></iframe>

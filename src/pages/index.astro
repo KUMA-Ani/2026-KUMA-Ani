@@ -854,16 +854,18 @@ const pastYears = years.filter(y => y.active && !y.current);
         if (state === 0 && diff > 50) {
           // 메인에서 위로 → 전시개요
           showInfo();
-        } else if (state === 1 && diff < -50) {
-          // 전시개요에서 아래로 → 메인으로
-          hideInfo();
         } else if (state === 1 && diff > 50) {
-          // 전시개요에서 위로 → 과거전시 섹션 열고 스크롤
+          // 전시개요에서 위로 → 메인으로
+          hideInfo();
+        } else if (state === 1 && diff < -50) {
+          // 전시개요에서 아래로 → 과거전시
           const past = document.getElementById('m-past-section');
           if (past) {
             past.classList.add('unlocked');
             unlockScroll();
-            setTimeout(() => past.scrollIntoView({ behavior: 'smooth' }), 50);
+            setTimeout(() => {
+              window.scrollTo({ top: past.offsetTop, behavior: 'smooth' });
+            }, 80);
           }
         }
       }, { passive: true });

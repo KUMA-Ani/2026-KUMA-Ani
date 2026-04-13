@@ -281,42 +281,7 @@ const pastYears = years.filter(y => y.active && !y.current);
 
     .footer-text { font-size: 0.68rem; color: rgba(255,255,255,0.1); letter-spacing: 3px; text-transform: uppercase; }
 
-    /* ── 모바일 반응형 ── */
-    @media (max-width: 768px) {
-      html { scroll-snap-type: y mandatory; }
-
-      /* 상단 바 */
-      .topbar { padding: 0 16px; height: 48px; }
-      .topbar-logo-fallback { font-size: 0.68rem; }
-      .topbar-link { width: 30px; height: 30px; }
-      .topbar-link svg { width: 13px; height: 13px; }
-
-      /* PC 전용 요소 숨기기 */
-      .current-section { display: none; }
-      .scroll-hint { display: none; }
-
-      /* 모바일 섹션 표시 */
-      .m-visual-section { display: flex; }
-      .m-info-section { display: flex; }
-
-      /* 과거 전시 */
-      .past-section {
-        padding: 60px 20px 48px;
-        gap: 28px;
-        height: 100vh;
-        min-height: unset;
-        align-items: flex-start;
-        justify-content: center;
-      }
-      .past-heading { font-size: 1.6rem; }
-      .past-cards { gap: 16px; padding-bottom: 8px; }
-      .past-card { width: 72vw; height: 72vw; border-radius: 20px; padding: 22px; }
-      .past-num { font-size: 3.8rem; letter-spacing: -4px; }
-      .past-go-text { font-size: 0.65rem; }
-      .past-go-arrow { font-size: 1.6rem; }
-    }
-
-    /* ── 모바일 전용 섹션 (PC에서는 숨김) ── */
+    /* ── 모바일 전용 섹션 (기본: PC에서 숨김) ── */
     .m-visual-section { display: none; }
     .m-info-section { display: none; }
 
@@ -430,6 +395,41 @@ const pastYears = years.filter(y => y.active && !y.current);
       letter-spacing: 2px; text-transform: uppercase;
       background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px;
       backdrop-filter: blur(4px); white-space: nowrap; transition: color 0.2s;
+    }
+
+    /* ── 모바일 미디어 쿼리 (항상 마지막에) ── */
+    @media (max-width: 768px) {
+      html { scroll-snap-type: y mandatory; }
+
+      /* 상단 바 */
+      .topbar { padding: 0 16px; height: 48px; }
+      .topbar-logo-fallback { font-size: 0.68rem; }
+      .topbar-link { width: 30px; height: 30px; }
+      .topbar-link svg { width: 13px; height: 13px; }
+
+      /* PC 전용 요소 숨기기 */
+      .current-section { display: none !important; }
+      .scroll-hint { display: none !important; }
+
+      /* 모바일 섹션 표시 */
+      .m-visual-section { display: flex !important; }
+      .m-info-section { display: flex !important; }
+
+      /* 과거 전시 */
+      .past-section {
+        padding: 60px 20px 48px;
+        gap: 28px;
+        height: 100vh;
+        min-height: unset;
+        align-items: flex-start;
+        justify-content: center;
+      }
+      .past-heading { font-size: 1.6rem; }
+      .past-cards { gap: 16px; padding-bottom: 8px; }
+      .past-card { width: 72vw; height: 72vw; border-radius: 20px; padding: 22px; }
+      .past-num { font-size: 3.8rem; letter-spacing: -4px; }
+      .past-go-text { font-size: 0.65rem; }
+      .past-go-arrow { font-size: 1.6rem; }
     }
   </style>
 </head>

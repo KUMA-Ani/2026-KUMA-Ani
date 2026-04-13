@@ -354,7 +354,7 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-map-placeholder { width: 100%; height: 100%; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); font-size: 0.78rem; flex-direction: column; gap: 8px; }
     .m-map-link { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: rgba(255,255,255,0.5); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(4px); white-space: nowrap; }
 
-    /* 모바일 과거전시 — 일반 스크롤 */
+    /* 모바일 과거전시 — 일반 스크롤, 처음엔 숨김 */
     .m-past-section {
       display: none;
       background: #050505;
@@ -363,6 +363,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       flex-direction: column;
       gap: 28px;
     }
+    .m-past-section.unlocked { display: flex !important; }
     .m-past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 8px; }
     .m-past-heading { font-size: 1.6rem; font-weight: 700; color: rgba(255,255,255,0.5); }
     .m-past-cards-wrap { display: flex; gap: 16px; flex-direction: column; }
@@ -383,12 +384,10 @@ const pastYears = years.filter(y => y.active && !y.current);
 
       .current-section { display: none !important; }
       .scroll-hint { display: none !important; }
-      /* PC 과거전시 숨기기 */
       .past-section { display: none !important; }
 
       .m-container { display: block !important; }
       .m-visual-section { display: flex !important; }
-      .m-past-section { display: flex !important; }
     }
     .m-grid {
       position: absolute; inset: 0;
@@ -859,10 +858,13 @@ const pastYears = years.filter(y => y.active && !y.current);
           // 전시개요에서 아래로 → 메인으로
           hideInfo();
         } else if (state === 1 && diff > 50) {
-          // 전시개요에서 위로 → 스크롤 잠금 해제 후 과거전시로
-          unlockScroll();
+          // 전시개요에서 위로 → 과거전시 섹션 열고 스크롤
           const past = document.getElementById('m-past-section');
-          if (past) setTimeout(() => past.scrollIntoView({ behavior: 'smooth' }), 50);
+          if (past) {
+            past.classList.add('unlocked');
+            unlockScroll();
+            setTimeout(() => past.scrollIntoView({ behavior: 'smooth' }), 50);
+          }
         }
       }, { passive: true });
 

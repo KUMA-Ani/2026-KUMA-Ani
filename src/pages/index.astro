@@ -318,7 +318,7 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-arrow { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); font-size: 2.8rem; color: rgba(255,255,255,0.5); font-weight: 200; z-index: 2; transition: opacity 0.3s; }
     .m-scroll-hint { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; color: rgba(255,255,255,0.25); font-size: 0.6rem; letter-spacing: 2px; text-transform: uppercase; animation: bounce 2.5s infinite; z-index: 10; pointer-events: none; transition: opacity 0.3s; }
 
-    /* 전시 개요 오버레이 — 아래서 위로 올라옴 */
+    /* 전시 개요 오버레이 — 아래서 위로, 메인비주얼이 뒤에 비침 */
     .m-info-overlay {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -326,44 +326,13 @@ const pastYears = years.filter(y => y.active && !y.current);
       transform: translateY(100%);
       transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
       z-index: 10;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex; flex-direction: column;
       overflow: hidden;
     }
     .m-info-overlay.visible { transform: translateY(0); }
-
-    /* 과거전시 — fixed로 아래서 올라옴 */
-    .m-past-overlay {
-      position: fixed;
-      top: 48px; left: 0; right: 0;
-      height: calc(100vh - 48px);
-      transform: translateY(100%);
-      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-      z-index: 20;
-      background: #050505;
-      display: flex; flex-direction: column;
-      overflow: hidden;
-    }
-    .m-past-overlay.visible { transform: translateY(0); }
-    .m-past-inner {
-      padding: 48px 20px 40px;
-      display: flex; flex-direction: column;
-      gap: 28px; height: 100%; overflow-y: auto;
-    }
-    .m-past-header { }
-    .m-past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 8px; }
-    .m-past-heading { font-size: 1.6rem; font-weight: 700; color: rgba(255,255,255,0.5); }
-    .m-past-cards { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-    .m-past-cards::-webkit-scrollbar { display: none; }
-    .m-past-card { flex-shrink: 0; width: 68vw; height: 68vw; border-radius: 20px; text-decoration: none; color: #fff; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 22px; border: 1px solid rgba(255,255,255,0.08); background: #0d0d0d; opacity: 0.7; transition: opacity 0.3s; }
-    .m-past-card:hover { opacity: 1; }
-    .m-past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.15; }
-    .m-past-num { font-size: 3.8rem; font-weight: 900; letter-spacing: -4px; color: rgba(255,255,255,0.8); position: relative; z-index: 1; }
-    .m-past-go { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; position: relative; z-index: 1; color: rgba(255,255,255,0.35); }
-    .m-past-go-text { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; }
-    .m-past-go-arrow { font-size: 1.8rem; line-height: 1; font-weight: 200; }
 
     .m-info-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.2); margin: 14px auto 0; flex-shrink: 0; cursor: pointer; }
 
@@ -385,15 +354,28 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-map-placeholder { width: 100%; height: 100%; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); font-size: 0.78rem; flex-direction: column; gap: 8px; }
     .m-map-link { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: rgba(255,255,255,0.5); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(4px); white-space: nowrap; }
 
-    /* 스크롤 가능한 빈 공간 — fixed 요소 아래 실제 높이 확보 */
-    .m-spacer-visual { height: calc(100vh - 48px); }
-    .m-spacer-info { height: calc(100vh - 48px); }
+    /* 모바일 과거전시 — 일반 스크롤 */
+    .m-past-section {
+      display: none;
+      background: #050505;
+      padding: 60px 20px 60px;
+      min-height: 100vh;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .m-past-tag { font-size: 0.68rem; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.2); display: block; margin-bottom: 8px; }
+    .m-past-heading { font-size: 1.6rem; font-weight: 700; color: rgba(255,255,255,0.5); }
+    .m-past-cards-wrap { display: flex; gap: 16px; flex-direction: column; }
+    .m-past-card { width: 100%; aspect-ratio: 1/1; border-radius: 20px; text-decoration: none; color: #fff; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; padding: 22px; border: 1px solid rgba(255,255,255,0.08); background: #0d0d0d; opacity: 0.75; transition: opacity 0.3s; }
+    .m-past-card:active { opacity: 1; }
+    .m-past-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.15; }
+    .m-past-num { font-size: 4rem; font-weight: 900; letter-spacing: -4px; color: rgba(255,255,255,0.8); position: relative; z-index: 1; }
+    .m-past-go { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; position: relative; z-index: 1; color: rgba(255,255,255,0.35); }
+    .m-past-go-text { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; }
+    .m-past-go-arrow { font-size: 1.8rem; line-height: 1; font-weight: 200; }
 
     /* ── 모바일 미디어 쿼리 ── */
     @media (max-width: 768px) {
-      html { overflow-y: auto; scroll-snap-type: none; }
-      body { overflow-x: hidden; }
-
       .topbar { padding: 0 16px; height: 48px; }
       .topbar-logo-fallback { font-size: 0.68rem; }
       .topbar-link { width: 30px; height: 30px; }
@@ -401,21 +383,12 @@ const pastYears = years.filter(y => y.active && !y.current);
 
       .current-section { display: none !important; }
       .scroll-hint { display: none !important; }
+      /* PC 과거전시 숨기기 */
+      .past-section { display: none !important; }
 
       .m-container { display: block !important; }
       .m-visual-section { display: flex !important; }
-
-      .past-section {
-        padding: 60px 20px 48px;
-        gap: 28px; min-height: 100vh; height: auto;
-        align-items: flex-start; justify-content: center;
-      }
-      .past-heading { font-size: 1.6rem; }
-      .past-cards { gap: 16px; }
-      .past-card { width: 72vw; height: 72vw; border-radius: 20px; padding: 22px; }
-      .past-num { font-size: 3.8rem; letter-spacing: -4px; }
-      .past-go-text { font-size: 0.65rem; }
-      .past-go-arrow { font-size: 1.6rem; }
+      .m-past-section { display: flex !important; }
     }
     .m-grid {
       position: absolute; inset: 0;
@@ -636,32 +609,30 @@ const pastYears = years.filter(y => y.active && !y.current);
       </div>
     </div>
 
-    <!-- 과거 전시 오버레이 (아래서 위로, 전시개요 위에) -->
-    {pastYears.length > 0 && (
-      <div class="m-past-overlay" id="m-past-overlay">
-        <div class="m-past-inner">
-          <div class="m-past-header">
-            <span class="m-past-tag">Archive</span>
-            <p class="m-past-heading">과거 전시</p>
-          </div>
-          <div class="m-past-cards">
-            {pastYears.map(year => (
-              <a href={`/${year.id}/`} class="m-past-card">
-                {year.thumbnail && <div class="m-past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
-                <span class="m-past-num">{year.label}</span>
-                <div class="m-past-go">
-                  <span class="m-past-go-text">보러가기</span>
-                  <span class="m-past-go-arrow">→</span>
-                </div>
-              </a>
-            ))}
-          </div>
-          <p style="font-size:0.65rem;color:rgba(255,255,255,0.1);letter-spacing:3px;text-transform:uppercase;text-align:center;">한국영상대학교 게임애니메이션과</p>
-        </div>
-      </div>
-    )}
-
   </div>
+
+  <!-- 모바일 과거전시 — 일반 스크롤 -->
+  {pastYears.length > 0 && (
+    <section class="m-past-section" id="m-past-section">
+      <div>
+        <span class="m-past-tag">Archive</span>
+        <p class="m-past-heading">과거 전시</p>
+      </div>
+      <div class="m-past-cards-wrap">
+        {pastYears.map(year => (
+          <a href={`/${year.id}/`} class="m-past-card">
+            {year.thumbnail && <div class="m-past-card-bg" style={`background-image:url('${year.thumbnail}')`}></div>}
+            <span class="m-past-num">{year.label}</span>
+            <div class="m-past-go">
+              <span class="m-past-go-text">보러가기</span>
+              <span class="m-past-go-arrow">→</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <p style="font-size:0.65rem;color:rgba(255,255,255,0.1);letter-spacing:3px;text-transform:uppercase;text-align:center;">한국영상대학교 게임애니메이션과</p>
+    </section>
+  )}
 
   <!-- 현재 전시 섹션 (PC) -->
   <section class="current-section">
@@ -825,49 +796,51 @@ const pastYears = years.filter(y => y.active && !y.current);
       if (window.innerWidth > 768) return;
 
       const infoOverlay = document.getElementById('m-info-overlay');
-      const pastOverlay = document.getElementById('m-past-overlay');
       const visualLink = document.getElementById('m-visual-link');
       const scrollHint = document.getElementById('m-scroll-hint');
       const mArrow = document.querySelector('.m-arrow');
       const handle = document.getElementById('m-handle');
       if (!infoOverlay) return;
 
-      // 상태: 0=메인비주얼, 1=전시개요, 2=과거전시
-      let state = 0;
+      let state = 0; // 0=메인, 1=전시개요
       let touchStartY = 0;
       let touchMoved = false;
+      let locked = true; // 스크롤 잠금 여부
 
-      // html/body 스크롤 완전 차단
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
+      function lockScroll() {
+        locked = true;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      }
 
-      function goTo(s) {
-        if (s === state) return;
-        state = s;
+      function unlockScroll() {
+        locked = false;
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
 
-        if (s === 0) {
-          infoOverlay.classList.remove('visible');
-          if (pastOverlay) pastOverlay.classList.remove('visible');
-          if (scrollHint) scrollHint.style.opacity = '1';
-          if (mArrow) mArrow.style.opacity = '1';
-          if (visualLink) visualLink.style.pointerEvents = '';
-        } else if (s === 1) {
-          infoOverlay.classList.add('visible');
-          if (pastOverlay) pastOverlay.classList.remove('visible');
-          if (scrollHint) scrollHint.style.opacity = '0';
-          if (mArrow) mArrow.style.opacity = '0';
-          if (visualLink) visualLink.style.pointerEvents = 'none';
-        } else if (s === 2) {
-          infoOverlay.classList.add('visible');
-          if (pastOverlay) pastOverlay.classList.add('visible');
-          if (visualLink) visualLink.style.pointerEvents = 'none';
-        }
+      lockScroll();
+
+      function showInfo() {
+        state = 1;
+        infoOverlay.classList.add('visible');
+        if (scrollHint) scrollHint.style.opacity = '0';
+        if (mArrow) mArrow.style.opacity = '0';
+        if (visualLink) visualLink.style.pointerEvents = 'none';
+      }
+
+      function hideInfo() {
+        state = 0;
+        infoOverlay.classList.remove('visible');
+        if (scrollHint) scrollHint.style.opacity = '1';
+        if (mArrow) mArrow.style.opacity = '1';
+        if (visualLink) visualLink.style.pointerEvents = '';
+        lockScroll();
       }
 
       // 핸들 탭 → 메인으로
-      if (handle) handle.addEventListener('click', () => goTo(0));
+      if (handle) handle.addEventListener('click', hideInfo);
 
-      // 터치 스와이프
       document.addEventListener('touchstart', (e) => {
         touchStartY = e.touches[0].clientY;
         touchMoved = false;
@@ -879,12 +852,26 @@ const pastYears = years.filter(y => y.active && !y.current);
         if (!touchMoved) return;
         const diff = touchStartY - e.changedTouches[0].clientY;
 
-        if (diff > 50) {
-          // 위로 스와이프 → 다음 단계
-          if (state < (pastOverlay ? 2 : 1)) goTo(state + 1);
-        } else if (diff < -50) {
-          // 아래로 스와이프 → 이전 단계
-          if (state > 0) goTo(state - 1);
+        if (state === 0 && diff > 50) {
+          // 메인에서 위로 → 전시개요
+          showInfo();
+        } else if (state === 1 && diff < -50) {
+          // 전시개요에서 아래로 → 메인으로
+          hideInfo();
+        } else if (state === 1 && diff > 50) {
+          // 전시개요에서 위로 → 스크롤 잠금 해제 후 과거전시로
+          unlockScroll();
+          const past = document.getElementById('m-past-section');
+          if (past) setTimeout(() => past.scrollIntoView({ behavior: 'smooth' }), 50);
+        }
+      }, { passive: true });
+
+      // 과거전시 섹션으로 스크롤했을 때 다시 올라오면 잠금
+      window.addEventListener('scroll', () => {
+        if (locked) return;
+        if (window.scrollY < 10) {
+          lockScroll();
+          showInfo();
         }
       }, { passive: true });
     }

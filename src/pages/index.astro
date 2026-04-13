@@ -190,7 +190,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       aspect-ratio: 4 / 3;
       align-self: center;
     }
-    .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.85); }
+    .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: brightness(0.75) saturate(0.6); }
     .map-placeholder {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -331,7 +331,7 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; }
     .m-exhibit-desc { font-size: 0.78rem; color: rgba(255,255,255,0.4); line-height: 1.75; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
     .m-map { flex: 1; position: relative; padding: 14px 20px 20px; min-height: 0; }
-    .m-map iframe { width: 100%; height: 100%; border: none; border-radius: 16px; display: block; filter: invert(1) hue-rotate(180deg) saturate(0.4) brightness(0.85); }
+    .m-map iframe { width: 100%; height: 100%; border: none; border-radius: 16px; display: block; filter: brightness(0.75) saturate(0.6); }
     .m-map-placeholder { width: 100%; height: 100%; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); font-size: 0.78rem; flex-direction: column; gap: 8px; }
     .m-map-link { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: rgba(255,255,255,0.5); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(4px); white-space: nowrap; }
 
@@ -462,7 +462,7 @@ const pastYears = years.filter(y => y.active && !y.current);
         </div>
         <div class="m-map">
           {info.mapUrl
-            ? <iframe src={`${info.mapUrl}&iwloc=&`} width="100%" height="100%" style="border:0;pointer-events:none;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            ? <iframe src={info.mapUrl} width="100%" height="100%" style="border:0;pointer-events:none;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             : <div class="m-map-placeholder">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="white" opacity="0.3"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                 <span>지도 준비 중</span>
@@ -583,7 +583,7 @@ const pastYears = years.filter(y => y.active && !y.current);
       <div class="map-section">
         {info.mapUrl
           ? <iframe
-              src={`${info.mapUrl}&iwloc=&`}
+              src={info.mapUrl}
               width="100%"
               height="100%"
               style="border:0;pointer-events:none;"

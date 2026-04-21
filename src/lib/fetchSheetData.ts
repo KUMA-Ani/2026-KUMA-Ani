@@ -61,20 +61,52 @@ function sheetCsvUrl(spreadsheetId: string, gid: string): string {
 }
 
 function parseCsv(csv: string): string[][] {
-  const lines = csv.trim().split('\n');
-  return lines.map(line => {
-    const cells: string[] = [];
-    let cur = '';
-    let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else { inQ = !inQ; } }
-      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = ''; }
-      else { cur += ch; }
+  const rows: string[][] = [];
+  let cells: string[] = [];
+  let cur = '';
+  let inQ = false;
+
+  for (let i = 0; i < csv.length; i++) {
+    const ch = csv[i];
+    const next = csv[i + 1];
+
+    if (ch === '"') {
+      if (inQ && next === '"') {
+        // escaped quote
+        cur += '"';
+        i++;
+      } else {
+        inQ = !inQ;
+      }
+    } else if (ch === ',' && !inQ) {
+      cells.push(cur.trim());
+      cur = '';
+    } else if ((ch === '\n' || (ch === '\r' && next === '\n')) && !inQ) {
+      if (ch === '\r') i++; // skip \n after \r
+      cells.push(cur.trim());
+      rows.push(cells);
+      cells = [];
+      cur = '';
+    } else if (ch === '\r' && !inQ) {
+      // lone \r
+      cells.push(cur.trim());
+      rows.push(cells);
+      cells = [];
+      cur = '';
+    } else {
+      cur += ch;
     }
+  }
+
+  // last cell/row
+  if (cur || cells.length > 0) {
     cells.push(cur.trim());
-    return cells;
-  });
+    rows.push(cells);
+  }
+
+  return rows.filter(r => r.some(c => c !== ''));
+}
+
 }
 
 function rowsToObjects(rows: string[][]): Record<string, string>[] {

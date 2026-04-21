@@ -3,6 +3,12 @@ import { fetchSiteData } from '../lib/fetchSheetData';
 const { years, info } = await fetchSiteData();
 const currentYears = years.filter(y => y.active && y.current);
 const pastYears = years.filter(y => y.active && !y.current);
+
+// 쉼표를 줄바꿈으로 변환
+function nl(text: string | undefined) {
+  if (!text) return '';
+  return text.replace(/,/g, '\n');
+}
 ---
 <html lang="ko">
 <head>
@@ -189,7 +195,7 @@ const pastYears = years.filter(y => y.active && !y.current);
     .info-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
     .info-icon { font-size: 0.82rem; margin-top: 1px; flex-shrink: 0; opacity: 0.6; }
     .info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; white-space: pre-line; word-break: keep-all; }
-    .exhibit-desc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
+    .exhibit-desc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; white-space: pre-line; }
 
     /* 지도 — 가로로 넓은 비율, 중앙 배치 */
     .map-section {
@@ -466,17 +472,17 @@ const pastYears = years.filter(y => y.active && !y.current);
           {info.exhibitionDate && (
             <div class="m-info-row">
               <span class="m-info-icon">📅</span>
-              <span class="m-info-text">{info.exhibitionDate}</span>
+              <span class="m-info-text">{nl(info.exhibitionDate)}</span>
             </div>
           )}
           {info.exhibitionPlace && (
             <div class="m-info-row">
               <span class="m-info-icon">📍</span>
-              <span class="m-info-text">{info.exhibitionPlace}</span>
+              <span class="m-info-text">{nl(info.exhibitionPlace)}</span>
             </div>
           )}
           {info.exhibitionDesc && (
-            <p class="m-exhibit-desc">{info.exhibitionDesc}</p>
+            <p class="m-exhibit-desc">{nl(info.exhibitionDesc)}</p>
           )}
         </div>
         <div class="m-map">
@@ -602,17 +608,17 @@ const pastYears = years.filter(y => y.active && !y.current);
         {info.exhibitionDate && (
           <div class="info-row">
             <span class="info-icon">📅</span>
-            <span class="info-text">{info.exhibitionDate}</span>
+            <span class="info-text">{nl(info.exhibitionDate)}</span>
           </div>
         )}
         {info.exhibitionPlace && (
           <div class="info-row">
             <span class="info-icon">📍</span>
-            <span class="info-text">{info.exhibitionPlace}</span>
+            <span class="info-text">{nl(info.exhibitionPlace)}</span>
           </div>
         )}
         {info.exhibitionDesc && (
-          <p class="exhibit-desc">{info.exhibitionDesc}</p>
+          <p class="exhibit-desc">{nl(info.exhibitionDesc)}</p>
         )}
       </div>
 

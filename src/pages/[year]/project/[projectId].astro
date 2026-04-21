@@ -20,6 +20,11 @@ export async function getStaticPaths() {
 
 const { year } = Astro.params;
 const { project, trackId, trackTitle, trackCount } = Astro.props;
+
+function nl(text: string | undefined) {
+  if (!text) return '';
+  return text.replace(/,/g, '\n');
+}
 ---
 <html lang="ko">
 <head>
@@ -128,7 +133,7 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
       <div class="info-col">
         <div class="card">
           <p class="card-label">작품 개요</p>
-          <p class="description">{project?.description || '설명이 없습니다.'}</p>
+          <p class="description">{nl(project?.description) || '설명이 없습니다.'}</p>
         </div>
 
         {project?.members && project.members.length > 0 && (

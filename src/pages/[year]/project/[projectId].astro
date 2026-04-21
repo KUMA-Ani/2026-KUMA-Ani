@@ -68,8 +68,27 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
     .gallery { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 48px; }
     .gallery-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.5); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
     .gallery-label::before { content: ''; display: inline-block; width: 3px; height: 0.9rem; background: #007bff; border-radius: 2px; }
-    .screenshots { display: flex; flex-direction: column; gap: 20px; }
-    .screenshots img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); display: block; }
+
+    .screenshots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* 정사각형에 가까운 이미지 — 2열 유지 */
+    .screenshot-item.square { grid-column: span 1; }
+
+    /* 가로로 긴 이미지 — 1열 전체 */
+    .screenshot-item.wide { grid-column: span 2; }
+
+    /* 비율 감지 전 기본값 — 일단 전체 너비 */
+    .screenshot-item { grid-column: span 2; }
+
+    .screenshot-item img {
+      width: 100%; display: block;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
 
     @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
     @media (max-width: 768px) { .container { padding: 28px 18px 80px; } h1 { font-size: 1.8rem; } }
@@ -123,13 +142,42 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
     {project?.screenshots && project.screenshots.length > 0 && (
       <div class="gallery">
         <p class="gallery-label">스크린샷</p>
-        <div class="screenshots">
+        <div class="screenshots" id="screenshots">
           {project.screenshots.map((src: string, i: number) => (
-            <img src={src} alt={`Screenshot ${i + 1}`} loading="lazy" />
+            <div class="screenshot-item" data-index={i}>
+              <img
+                src={src}
+                alt={`Screenshot ${i + 1}`}
+                loading="lazy"
+                onload="detectRatio(this)"
+              />
+            </div>
           ))}
         </div>
       </div>
     )}
+
+  <script>
+    function detectRatio(img: HTMLImageElement) {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      const item = img.closest('.screenshot-item') as HTMLElement;
+      if (!item) return;
+      // 가로/세로 비율이 1.2 미만이면 정사각형에 가깝다고 판단 → 2열
+      if (ratio < 1.2) {
+        item.classList.add('square');
+      } else {
+        item.classList.add('wide');
+      }
+    }
+
+    // 이미 캐시된 이미지 처리
+    document.querySelectorAll('.screenshot-item img').forEach((img) => {
+      const el = img as HTMLImageElement;
+      if (el.complete && el.naturalWidth > 0) {
+        detectRatio(el);
+      }
+    });
+  </script>
   </div>
 </body>
 </html>

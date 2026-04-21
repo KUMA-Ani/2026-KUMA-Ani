@@ -14,7 +14,20 @@ function nl(text: string | undefined) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KUMA 졸업 전시회</title>
+  <title>{info.exhibitionTitle || 'KUMA 졸업 전시회'} | 한국영상대학교 게임애니메이션과</title>
+  <meta name="description" content={`${info.exhibitionTitle || 'KUMA 졸업 전시회'} - 한국영상대학교 게임애니메이션과 졸업 전시회. ${info.exhibitionDate ? info.exhibitionDate + ' ' : ''}${info.exhibitionPlace ? info.exhibitionPlace : ''}`} />
+  <meta name="keywords" content="한국영상대학교,게임애니메이션과,졸업전시회,KUMA,게임,애니메이션,졸업작품" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={`${info.exhibitionTitle || 'KUMA 졸업 전시회'} | 한국영상대학교 게임애니메이션과`} />
+  <meta property="og:description" content={`한국영상대학교 게임애니메이션과 졸업 전시회. ${info.exhibitionDate || ''}`} />
+  {info.bgImage && <meta property="og:image" content={info.bgImage} />}
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={`${info.exhibitionTitle || 'KUMA 졸업 전시회'}`} />
+  <meta name="twitter:description" content={`한국영상대학교 게임애니메이션과 졸업 전시회. ${info.exhibitionDate || ''}`} />
+  {info.bgImage && <meta name="twitter:image" content={info.bgImage} />}
+  <link rel="canonical" href="https://2026-kuma-ani.vercel.app/" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }

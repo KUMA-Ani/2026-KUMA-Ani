@@ -21,7 +21,12 @@ const showTrackNav = (yearData?.trackCount ?? 1) > 1;
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{track?.title ?? trackId} - KUMA {year}</title>
+  <title>{track?.title ?? trackId} - KUMA {year} | 한국영상대학교 게임애니메이션과</title>
+  <meta name="description" content={`한국영상대학교 게임애니메이션과 ${year} 졸업 전시회 ${track?.title ?? ''} 작품 목록`} />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content={`${track?.title} | KUMA ${year}`} />
+  <meta property="og:description" content={`한국영상대학교 게임애니메이션과 ${year} 졸업 전시회 ${track?.title ?? ''}`} />
+  <meta property="og:locale" content="ko_KR" />
   <style>
     body { background: #080808; color: #fff; font-family: 'Pretendard', sans-serif; margin: 0; padding: 56px 52px 100px; }
 

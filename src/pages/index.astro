@@ -12,6 +12,7 @@ function nl(text: string | undefined) {
 ---
 <html lang="ko">
 <head>
+  <meta name="google-site-verification" content="google19942fc8f252bcc7" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{info.exhibitionTitle || 'KUMA 졸업 전시회'} | 한국영상대학교 게임애니메이션과</title>
@@ -32,10 +33,11 @@ function nl(text: string | undefined) {
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
     body { background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; height: 100%; }
+    .page-wrapper { max-width: 1600px; margin: 0 auto; position: relative; overflow: hidden; }
 
     /* ── 상단 바 ── */
     .topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1600px; z-index: 100;
       height: 52px;
       background: rgba(8,8,8,0.92);
       backdrop-filter: blur(12px);
@@ -67,7 +69,7 @@ function nl(text: string | undefined) {
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: calc((100vh - 52px) * 1.35) 1fr;
+      grid-template-columns: calc(min(100vh - 52px, 1100px) * 1.35) 1fr;
       padding-top: 52px;
       position: relative;
     }
@@ -408,6 +410,7 @@ function nl(text: string | undefined) {
     }  </style>
 </head>
 <body>
+<div class="page-wrapper">
 
   <!-- 상단 바 -->
   <header class="topbar">
@@ -718,5 +721,6 @@ function nl(text: string | undefined) {
   )}
 
 
+</div>
 </body>
 </html>

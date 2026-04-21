@@ -107,8 +107,6 @@ function parseCsv(csv: string): string[][] {
   return rows.filter(r => r.some(c => c !== ''));
 }
 
-}
-
 function rowsToObjects(rows: string[][]): Record<string, string>[] {
   if (rows.length < 2) return [];
   const headers = rows[0].map(h => h.trim());

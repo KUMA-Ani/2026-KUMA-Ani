@@ -188,7 +188,7 @@ const pastYears = years.filter(y => y.active && !y.current);
     .exhibit-title { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.3; letter-spacing: -0.5px; }
     .info-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
     .info-icon { font-size: 0.82rem; margin-top: 1px; flex-shrink: 0; opacity: 0.6; }
-    .info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; }
+    .info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.6; font-weight: 400; white-space: pre-line; word-break: keep-all; }
     .exhibit-desc { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.8; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
 
     /* 지도 — 가로로 넓은 비율, 중앙 배치 */
@@ -343,12 +343,12 @@ const pastYears = years.filter(y => y.active && !y.current);
     .m-info-inner { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
     .m-info-handle { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.2); margin: 12px auto 0; flex-shrink: 0; }
     .m-exhibit { flex: 0 0 auto; padding: 20px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .m-info-tag { font-size: 0.58rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 10px; display: block; font-weight: 600; }
-    .m-exhibit-title { font-size: 1.15rem; font-weight: 800; color: #fff; margin-bottom: 12px; line-height: 1.3; letter-spacing: -0.5px; }
+    .m-info-tag { font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 12px; display: block; font-weight: 600; }
+    .m-exhibit-title { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 14px; line-height: 1.3; letter-spacing: -0.5px; }
     .m-info-row { display: flex; gap: 10px; margin-bottom: 7px; align-items: flex-start; }
     .m-info-icon { font-size: 0.78rem; flex-shrink: 0; opacity: 0.6; margin-top: 2px; }
-    .m-info-text { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.5; }
-    .m-exhibit-desc { font-size: 0.75rem; color: rgba(255,255,255,0.4); line-height: 1.7; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; }
+    .m-info-text { font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.6; white-space: pre-line; word-break: keep-all; }
+    .m-exhibit-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.75; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); word-break: keep-all; white-space: pre-line; }
     .m-map { flex: 0 0 auto; height: 200px; position: relative; padding: 12px 16px 16px; margin-top: 200px; }
     .m-map iframe { width: 100%; height: 100%; border: none; border-radius: 14px; display: block; filter: invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.85); }
     .m-map-placeholder { width: 100%; height: 100%; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); font-size: 0.78rem; flex-direction: column; gap: 8px; }

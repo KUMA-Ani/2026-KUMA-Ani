@@ -145,12 +145,7 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
         <div class="screenshots" id="screenshots">
           {project.screenshots.map((src: string, i: number) => (
             <div class="screenshot-item" data-index={i}>
-              <img
-                src={src}
-                alt={`Screenshot ${i + 1}`}
-                loading="lazy"
-                onload="detectRatio(this)"
-              />
+              <img src={src} alt={`Screenshot ${i + 1}`} loading="lazy" />
             </div>
           ))}
         </div>
@@ -158,11 +153,11 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
     )}
 
   <script>
-    function detectRatio(img: HTMLImageElement) {
+    function applyRatio(img) {
       const ratio = img.naturalWidth / img.naturalHeight;
-      const item = img.closest('.screenshot-item') as HTMLElement;
+      const item = img.closest('.screenshot-item');
       if (!item) return;
-      // 가로/세로 비율이 1.2 미만이면 정사각형에 가깝다고 판단 → 2열
+      // 1.2 미만 = 정사각형에 가까움 → 2열
       if (ratio < 1.2) {
         item.classList.add('square');
       } else {
@@ -170,13 +165,25 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
       }
     }
 
-    // 이미 캐시된 이미지 처리
-    document.querySelectorAll('.screenshot-item img').forEach((img) => {
-      const el = img as HTMLImageElement;
-      if (el.complete && el.naturalWidth > 0) {
-        detectRatio(el);
-      }
-    });
+    function initGallery() {
+      const imgs = document.querySelectorAll('.screenshot-item img');
+      imgs.forEach((img) => {
+        if (img.complete && img.naturalWidth > 0) {
+          applyRatio(img);
+        } else {
+          img.addEventListener('load', () => applyRatio(img));
+          img.addEventListener('error', () => {
+            img.closest('.screenshot-item')?.classList.add('wide');
+          });
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initGallery);
+    } else {
+      initGallery();
+    }
   </script>
   </div>
 </body>

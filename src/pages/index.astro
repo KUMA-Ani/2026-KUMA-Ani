@@ -31,12 +31,12 @@ function nl(text: string | undefined) {
   <link rel="canonical" href="https://2026-kuma-ani.vercel.app/" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
-    body { background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; height: 100%; }
+    html { scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; background: #000; }
+    body { background: #000; color: #fff; font-family: 'Pretendard', 'Inter', sans-serif; height: 100%; max-width: 1440px; margin: 0 auto; }
 
     /* ── 상단 바 ── */
     .topbar {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 1440px; z-index: 100;
       height: 52px;
       background: rgba(8,8,8,0.92);
       backdrop-filter: blur(12px);
@@ -68,7 +68,7 @@ function nl(text: string | undefined) {
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: minmax(0, 1000px) 480px;
+      grid-template-columns: 2fr 1fr;
       padding-top: 52px;
       position: relative;
     }
@@ -223,7 +223,7 @@ function nl(text: string | undefined) {
       width: 90%;
       height: 360px;
       align-self: center;
-      margin-top: -250px;
+      margin-top: -150px;
     }
     .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.85); }
     .map-placeholder {

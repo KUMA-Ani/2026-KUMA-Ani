@@ -68,7 +68,7 @@ function nl(text: string | undefined) {
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: minmax(0, 1000px) 480px;
       padding-top: 52px;
       position: relative;
     }
@@ -219,11 +219,11 @@ function nl(text: string | undefined) {
       position: relative;
       background: #080808;
       flex-shrink: 0;
-      padding: 0 16px 16px 16px;
-      width: 320px;
-      height: 240px;
+      padding: 0 20px 20px 20px;
+      width: 90%;
+      height: 360px;
       align-self: center;
-      margin-top: -50px;
+      margin-top: -250px;
     }
     .map-section iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 16px; filter: invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.85); }
     .map-placeholder {

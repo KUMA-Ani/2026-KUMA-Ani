@@ -91,7 +91,15 @@ const { project, trackId, trackTitle, trackCount } = Astro.props;
     }
 
     @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
-    @media (max-width: 768px) { .container { padding: 28px 18px 80px; } h1 { font-size: 1.8rem; } }
+    @media (max-width: 768px) {
+      .container { padding: 24px 18px env(safe-area-inset-bottom, 100px); padding-bottom: max(100px, env(safe-area-inset-bottom, 0px) + 60px); }
+      h1 { font-size: 1.8rem; }
+      /* 모바일: 스크린샷 항상 1열 */
+      .screenshots { grid-template-columns: 1fr; }
+      .screenshot-item,
+      .screenshot-item.square,
+      .screenshot-item.wide { grid-column: span 1; }
+    }
   </style>
 </head>
 <body>

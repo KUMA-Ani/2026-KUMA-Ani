@@ -68,7 +68,7 @@ function nl(text: string | undefined) {
       scroll-snap-stop: always;
       height: 100vh;
       display: grid;
-      grid-template-columns: 1fr 420px;
+      grid-template-columns: minmax(auto, 900px) 520px;
       padding-top: 52px;
       position: relative;
     }
@@ -197,8 +197,8 @@ function nl(text: string | undefined) {
       display: flex; flex-direction: column;
       overflow: hidden;
       position: relative;
-      min-width: 360px;
-      max-width: 480px;
+      min-width: 460px;
+      max-width: 560px;
     }
 
     /* 전시 개요 */
